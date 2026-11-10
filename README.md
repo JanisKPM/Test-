@@ -17,6 +17,7 @@ Fächer: LK Geschichte, LK Politik, LK Englisch, P4 Mathe, P5 Deutsch, Biologie,
   - in einer Mappe „Mit KI erstellen“: Lernzettel und/oder Karteikarten zu einem Thema, optional aus eingefügtem Unterrichtsmaterial
   - im Lernzettel: überarbeiten, aufs Wichtigste kürzen (mit Rückgängig), Karteikarten daraus erstellen, Fragen stellen
   - im Kartensatz: weitere Karten vorschlagen
+- **📎 Dateien in Mappen:** PDF, Word (.docx), Fotos (JPG/PNG) und Textdateien hochladen – per Klick oder Drag & Drop. Text wird automatisch ausgelesen (durchsuchbar). Daraus mit ✨ einen Lernzettel **zusammenfassen** oder den Inhalt vollständig **übernehmen** lassen; Fotos und eingescannte PDFs liest die KI direkt („Text erkennen“ schreibt sie ab). Textdateien gehen auch ohne KI als Lernzettel.
 - **Mappen** pro Fach anlegen, umbenennen, löschen (z. B. „Q1 – Weimarer Republik“)
 - **Lernzettel** mit Live-Vorschau und einfacher Formatierung:
   - `# Überschrift`, `## Unterpunkt`
@@ -24,7 +25,7 @@ Fächer: LK Geschichte, LK Politik, LK Englisch, P4 Mathe, P5 Deutsch, Biologie,
   - `- Liste`, `1. Aufzählung`
   - `> Merksatz` (wird als 💡-Merkkasten dargestellt)
   - Tabellen: `| Jahr | Ereignis |`
-  - Drucken / als PDF speichern
+  - Drucken / als PDF speichern (nur lokale Datei)
 - **Karteikarten** mit Lernmodus: umdrehen (Leertaste), „gewusst“ (2) / „nicht gewusst“ (1).
   Nicht gewusste Karten kommen in derselben Runde erneut dran; danach „Nur Ungewusste“ wiederholen.
 - **Suche** über alle Fächer, Mappen und Inhalte

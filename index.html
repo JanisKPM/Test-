@@ -154,6 +154,21 @@ h2.sec .btn{margin-left:auto}
 .modal .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .modal .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:30;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+/* Dateien in Mappen */
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.file{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0}
+.file .ic{font-size:22px}
+.file .t{flex:1;min-width:0;cursor:pointer}
+.file .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.file .t small{color:var(--muted);font-size:12px}
+.file .acts{display:flex;gap:4px;flex:none}
+.dropzone{border:2px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);margin-bottom:8px;cursor:pointer}
+.dropzone:hover,.dropzone.over{border-color:var(--accent);background:var(--accent-soft);color:var(--text)}
+.chk{display:flex;flex-direction:column;gap:6px;background:var(--panel2);border-radius:8px;padding:10px 12px;margin-bottom:14px;max-height:180px;overflow:auto}
+.chk label{display:flex;gap:8px;align-items:center;font-weight:400;margin:0}
+.modal .chk input{width:auto;margin:0}
+.filetext{white-space:pre-wrap;background:var(--panel2);border-radius:8px;padding:10px 12px;max-height:50vh;overflow:auto;font-size:13.5px;margin-bottom:14px}
+.modal img.prev{max-width:100%;border-radius:8px;margin-bottom:14px}
 .menu-toggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -205,6 +220,7 @@ function migrate(st){
       return s ? {id:uid(), subjectId:s.id, at, note:'Klausur'} : null;
     }).filter(Boolean);
   }
+  st.subjects.forEach(s => s.folders.forEach(f => { if(!Array.isArray(f.files)) f.files = []; }));
   return st;
 }
 let state;
@@ -265,11 +281,12 @@ const cloud = {
 function withTimeout(p, ms){ return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]); }
 
 /* ---------- KI (nur in der Claude-Version verfügbar) ---------- */
-let sample = null, downloads = null;
+let sample = null, downloads = null, assets = null, imgLimits = null;
 const inClaude = !!window.claude?.use;
 if(inClaude){
-  window.claude.use('sample').then(s => { sample = s; render(); });
+  window.claude.use('sample').then(async s => { sample = s; imgLimits = s ? (await s.limits().catch(() => null))?.images || null : null; render(); });
   window.claude.use('downloads').then(d => { downloads = d; });
+  window.claude.use('assets').then(a => { assets = a; render(); });
 }
 
 /* =========================================================
@@ -527,7 +544,7 @@ function viewSubject(){
         <div class="bar"></div>
         <div class="folder-ic">📁</div>
         <h3>${esc(f.name)}</h3>
-        <div class="meta">${f.items.filter(i=>i.type==='note').length} Lernzettel · ${f.items.filter(i=>i.type==='cards').length} Kartensätze</div>
+        <div class="meta">${f.items.filter(i=>i.type==='note').length} Lernzettel · ${f.items.filter(i=>i.type==='cards').length} Kartensätze${f.files.length?` · ${f.files.length} Datei${f.files.length===1?'':'en'}`:''}</div>
       </div>`).join('')}</div>`
     : `<div class="empty">Noch keine Mappen in ${esc(s.name)}.<br>Lege eine Mappe pro Thema oder Semester an, z. B. „Q1 – Industrialisierung“.</div>`}`;
 }
@@ -544,8 +561,32 @@ function viewFolder(){
       <button class="btn small" onclick="renameFolder()">Umbenennen</button>
       <button class="btn small danger" onclick="deleteFolder()">Löschen</button>
     </div>
+    ${aiStatusBox()}
     ${items.length ? `<div class="list">${items.map(i => itemRow({s,f,i})).join('')}</div>`
-      : `<div class="empty">Diese Mappe ist leer.<br>📝 <b>Lernzettel</b> für Zusammenfassungen · 🗂️ <b>Karteikarten</b> zum Abfragen · ✨ <b>KI</b> erstellt beides für dich</div>`}`;
+      : `<div class="empty">Noch keine Lernzettel in dieser Mappe.<br>📝 <b>Lernzettel</b> für Zusammenfassungen · 🗂️ <b>Karteikarten</b> zum Abfragen · ✨ <b>KI</b> erstellt beides für dich – auch aus deinen Dateien unten</div>`}
+    <h2 class="sec">📎 Dateien <span class="badge">${f.files.length}</span></h2>
+    <div class="dropzone" id="drop" onclick="$('#fileIn').click()" role="button" tabindex="0">
+      <b>Dateien hinzufügen</b> – hierher ziehen oder klicken<br>
+      <small>PDF, Word (.docx), Fotos von Arbeitsblättern/Tafelbildern (JPG, PNG), Textdateien</small>
+    </div>
+    <input type="file" id="fileIn" multiple hidden accept=".pdf,.docx,.txt,.md,.csv,image/*">
+    ${f.files.length ? `<div class="files">${f.files.map(x => fileRow(x)).join('')}</div>` : ''}`;
+}
+const FILE_IC = {pdf:'📕', docx:'📘', image:'🖼️', text:'📄'};
+function fileInfo(x){
+  const bits = [x.kind === 'pdf' ? `PDF · ${x.pages} S.` : x.kind === 'docx' ? 'Word' : x.kind === 'image' ? 'Bild' : 'Text'];
+  bits.push(x.text ? (x.ocr ? 'Text erkannt (KI)' : 'Text lesbar') : (x.kind === 'image' || x.scanned ? 'Scan/Bild' : 'kein Text'));
+  return bits.join(' · ');
+}
+function fileRow(x){
+  return `<div class="file">
+    <span class="ic">${FILE_IC[x.kind]||'📄'}</span>
+    <div class="t" onclick="viewFile('${x.id}')"><b title="${esc(x.name)}">${esc(x.name)}</b><small>${fileInfo(x)}</small></div>
+    <div class="acts">
+      <button class="btn small ai" title="Lernzettel aus dieser Datei" aria-label="Lernzettel aus dieser Datei mit KI" onclick="aiCreate(['${x.id}'])">✨</button>
+      <button class="btn small danger" title="Datei löschen" aria-label="Datei löschen" onclick="deleteFile('${x.id}')">✕</button>
+    </div>
+  </div>`;
 }
 
 function aiStatusBox(){
@@ -654,8 +695,13 @@ function viewSearch(){
     const txt = (i.title + ' ' + (i.type==='note' ? i.content : i.cards.map(c=>c.q+' '+c.a).join(' '))).toLowerCase();
     if(txt.includes(q) || f.name.toLowerCase().includes(q)) hits.push({s,f,i});
   })));
+  const fileHits = [];
+  state.subjects.forEach(s => s.folders.forEach(f => f.files.forEach(x => {
+    if((x.name + ' ' + x.text).toLowerCase().includes(q)) fileHits.push(`<div class="row" onclick="go({view:'folder',s:'${s.id}',f:'${f.id}'})">
+      <span class="ic">${FILE_IC[x.kind]||'📄'}</span><div class="t"><b>${esc(x.name)}</b><small><span class="dot" style="background:${s.color};margin-right:5px"></span>${esc(s.name)} › ${esc(f.name)} · Datei</small></div></div>`);
+  })));
   return `<div class="head">${menuBtn}<h1>Suche: „${esc(query)}“</h1></div>
-    ${hits.length ? `<div class="list">${hits.map(itemRow).join('')}</div>` : `<div class="empty">Keine Treffer.</div>`}`;
+    ${hits.length || fileHits.length ? `<div class="list">${hits.map(itemRow).join('')}${fileHits.join('')}</div>` : `<div class="empty">Keine Treffer.</div>`}`;
 }
 
 /* =========================================================
@@ -666,7 +712,7 @@ function render(){
   renderSide();
   const v = {home:viewHome, subject:viewSubject, folder:viewFolder, item:viewItem, search:viewSearch, exams:viewExams}[route.view] || viewHome;
   $('#main').innerHTML = v();
-  bindItem(); tick();
+  bindItem(); bindFolder(); tick();
   if(keepAsk !== null && $('#askq')){ $('#askq').value = keepAsk; $('#askq').focus(); }
 }
 let saveTimer;
@@ -689,7 +735,7 @@ function bindItem(){
    ========================================================= */
 async function newFolder(sid){
   const name = await ask('Neue Mappe', '', 'Anlegen'); if(!name) return;
-  const f = {id:uid(), name, items:[]}; getS(sid).folders.push(f); save();
+  const f = {id:uid(), name, items:[], files:[]}; getS(sid).folders.push(f); save();
   go({view:'folder', s:sid, f:f.id});
 }
 async function renameFolder(){
@@ -700,6 +746,7 @@ async function renameFolder(){
 async function deleteFolder(){
   const s = getS(route.s), f = getF(s, route.f);
   if(!await confirmBox(`Mappe „${f.name}“ mit ${f.items.length} Einträgen wirklich löschen?`)) return;
+  if(assets) f.files.forEach(x => x.assetId && assets.delete(x.assetId).catch(() => {}));
   s.folders = s.folders.filter(x => x !== f); save(); go({view:'subject', s:s.id});
 }
 function addItem(f, type, title, data = {}){
@@ -807,12 +854,24 @@ const FORMAT = `FORMAT – halte dich genau daran, denn der Text wird von einer 
 - Keine verschachtelten Listen, keine Codeblöcke, keine Links, keine Emojis
 - Keine Einleitung wie "Hier ist…" und keine Schlussbemerkung – nur der Lernzettel selbst.`;
 
-function notePrompt({s, topic, material, size, extra}){
+function notePrompt({s, topic, material, size, extra, copy, nImages = 0}){
+  const imgNote = nImages ? `\nAngehängt sind außerdem ${nImages} Bild${nImages===1?'':'er'} (Fotos oder eingescannte Seiten meines Materials) – lies sie genau und nutze ihren Inhalt.` : '';
+  if(copy) return `${subjectContext(s)}
+
+Übertrage mein Material unten vollständig in einen gut lesbaren Lernzettel mit dem Titel "${topic}".
+- Nichts Inhaltliches weglassen und nichts dazuerfinden: alle Fakten, Daten, Beispiele, Definitionen, Formeln und Aufgaben übernehmen.
+- Nur sauber gliedern, in Stichpunkte/Tabellen bringen, offensichtliche Tipp- und Rechtschreibfehler korrigieren.
+- Unwichtiges wie Seitenzahlen, Kopf-/Fußzeilen und Namen auf Arbeitsblättern weglassen.
+- Behalte die Sprache des Materials bei.
+- Füge KEINEN Abschnitt mit Prüfungsfragen hinzu, außer das Material enthält selbst Aufgaben.
+${extra ? 'Zusätzliche Wünsche: ' + extra : ''}${imgNote}
+
+${FORMAT}${material ? `\n\nMEIN MATERIAL:\n"""\n${material}\n"""` : ''}`;
   return `${subjectContext(s)}
 
 Erstelle einen Lernzettel zum Thema: "${topic}".
-Umfang: ${size === 'lang' ? 'ausführlich (gründliche Zusammenfassung, ca. 1–2 Seiten)' : 'kompakt (das Wichtigste auf ca. einer halben bis einer Seite)'}.
-${material ? 'Stütze dich vor allem auf mein Unterrichtsmaterial unten. Ergänze nur gesichertes Standardwissen und erfinde keine Fakten, Daten oder Zitate.' : 'Verwende nur gesichertes Fachwissen. Wenn du dir bei einem Detail (Jahreszahl, Zahl, Zitat) nicht sicher bist, lass es weg.'}
+Umfang: ${size === 'lang' ? 'ausführlich (gründliche Zusammenfassung, ca. 1–2 Seiten)' : 'kompakt (das Wichtigste auf ca. einer halben bis einer Seite)'}.${imgNote}
+${material || nImages ? 'Stütze dich vor allem auf mein Unterrichtsmaterial. Ergänze nur gesichertes Standardwissen und erfinde keine Fakten, Daten oder Zitate.' : 'Verwende nur gesichertes Fachwissen. Wenn du dir bei einem Detail (Jahreszahl, Zahl, Zitat) nicht sicher bist, lass es weg.'}
 ${extra ? 'Zusätzliche Wünsche: ' + extra : ''}
 ${langRule(s)}
 
@@ -821,13 +880,14 @@ Inhaltlich:
 - Wo passend: Zeitleiste, Vergleichstabelle, Formeln oder Beispiele
 - Am Ende ein Abschnitt "## Typische Prüfungsfragen" mit 3–5 Aufgaben mit Operatoren (z. B. nennen, erläutern, analysieren, beurteilen) passend zum Anforderungsniveau
 
-${FORMAT}${material ? `\n\nMEIN MATERIAL:\n"""\n${material.slice(0, 60000)}\n"""` : ''}`;
+${FORMAT}${material ? `\n\nMEIN MATERIAL:\n"""\n${material}\n"""` : ''}`;
 }
-function cardsPrompt({s, topic, source, n, existing}){
+function cardsPrompt({s, topic, source, n, existing, nImages = 0}){
   return `${subjectContext(s)}
 
 Erstelle ${n} Karteikarten zum Thema "${topic}" für die Abiturvorbereitung.
-${source ? 'Grundlage ist dieser Lernzettel – nimm die Karten daraus und erfinde nichts dazu:\n"""\n' + source.slice(0, 60000) + '\n"""' : 'Verwende nur gesichertes Fachwissen.'}
+${source ? 'Grundlage ist dieses Material – nimm die Karten daraus und erfinde nichts dazu:\n"""\n' + source.slice(0, MAX_TEXT) + '\n"""' : nImages ? '' : 'Verwende nur gesichertes Fachwissen.'}
+${nImages ? `Grundlage sind (auch) die ${nImages} angehängten Bilder meines Materials – nimm die Karten daraus.` : ''}
 ${existing?.length ? 'Diese Karten gibt es schon, wiederhole sie nicht:\n' + existing.map(c => '- ' + c.q).join('\n') : ''}
 ${langRule(s)}
 Mische Begriffe/Definitionen, Daten/Fakten und Verständnisfragen ("Warum…?", "Erkläre…"). Antworten kurz und prüfungstauglich (1–3 Sätze oder Stichpunkte, Zeilenumbrüche erlaubt).
@@ -838,37 +898,61 @@ function cleanCards(arr){
   return (Array.isArray(arr) ? arr : []).filter(c => c && (c.q || c.a)).map(c => ({q:String(c.q ?? '').trim(), a:String(c.a ?? '').trim()}));
 }
 
-/* Neuer Lernzettel / Karteikarten in der aktuellen Mappe */
-async function aiCreate(){
+/* Neuer Lernzettel / Karteikarten in der aktuellen Mappe – optional aus Dateien */
+async function aiCreate(preselect){
   if(!aiReady()) return;
   const s = getS(route.s), f = getF(s, route.f);
+  const one = preselect?.length === 1 ? f.files.find(x => x.id === preselect[0]) : null;
+  const topicGuess = one ? one.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ') : f.name;
+  const fileBox = f.files.length ? `
+    <label>Dateien aus dieser Mappe verwenden</label>
+    <div class="chk">${f.files.map(x => `<label><input type="checkbox" name="file_${x.id}" ${!preselect || preselect.includes(x.id) ? 'checked' : ''}> ${FILE_IC[x.kind]||'📄'} ${esc(x.name)}</label>`).join('')}</div>
+    <label for="ai-how">Wie sollen die Dateien verwendet werden?</label>
+    <select name="how" id="ai-how">
+      <option value="summary">Zusammenfassen – die KI macht einen Lernzettel daraus</option>
+      <option value="copy" ${one ? 'selected' : ''}>Übernehmen – Inhalt vollständig als Lernzettel übertragen</option>
+    </select>` : `<p>Tipp: Lade unten in der Mappe Dateien hoch (PDF, Word, Fotos) – dann kann die KI daraus Lernzettel machen.</p>`;
   const r = await modal('✨ Mit KI erstellen', `
-    <label for="ai-topic">Thema</label>
-    <input name="topic" id="ai-topic" required value="${esc(f.name)}" placeholder="z. B. Hyperinflation 1923">
+    <label for="ai-topic">Thema / Titel</label>
+    <input name="topic" id="ai-topic" required value="${esc(topicGuess)}" placeholder="z. B. Hyperinflation 1923">
+    ${fileBox}
     <div class="two">
       <div><label for="ai-what">Was soll entstehen?</label>
-        <select name="what" id="ai-what"><option value="both">Lernzettel + Karteikarten</option><option value="note">Nur Lernzettel</option><option value="cards">Nur Karteikarten</option></select></div>
+        <select name="what" id="ai-what"><option value="both">Lernzettel + Karteikarten</option><option value="note" ${one?'selected':''}>Nur Lernzettel</option><option value="cards">Nur Karteikarten</option></select></div>
       <div><label for="ai-size">Umfang</label>
         <select name="size" id="ai-size"><option value="kurz">Kompakt</option><option value="lang">Ausführlich</option></select></div>
     </div>
-    <label for="ai-mat">Unterrichtsmaterial (optional)</label>
-    <textarea name="material" id="ai-mat" placeholder="Füge hier Mitschriften, Arbeitsblatt-Text oder Stichpunkte ein – die KI richtet sich dann danach."></textarea>
+    <label for="ai-mat">Weiteres Material zum Einfügen (optional)</label>
+    <textarea name="material" id="ai-mat" placeholder="Mitschriften oder Stichpunkte hier einfügen – die KI richtet sich danach."></textarea>
     <label for="ai-extra">Besondere Wünsche (optional)</label>
     <input name="extra" id="ai-extra" placeholder="z. B. Fokus auf Ursachen und Folgen, mit Zeitleiste">`, 'Erstellen', {wide:true});
   if(!r) return;
-  const topic = r.topic.trim(), material = r.material.trim(), extra = r.extra.trim();
-  if(r.what === 'cards') return aiNewCards(s, f, topic, material || null);
+  const topic = r.topic.trim(), extra = r.extra.trim();
+  const chosen = f.files.filter(x => r['file_' + x.id]);
+  const copy = chosen.length && r.how === 'copy';
+
+  // Dateien vorbereiten: Text direkt, Bilder/Scans als Bilder für die KI
+  let material = r.material.trim(), images = [];
+  if(chosen.length){
+    ai.start('Dateien werden vorbereitet…');
+    try { ({material, images} = await gatherFiles(chosen, material)); }
+    catch(e){ ai.end(); toast('Die Dateien konnten nicht gelesen werden. Versuch es nochmal.', 6000); return; }
+    ai.end();
+    if(!material.trim() && !images.length){ toast('Aus den gewählten Dateien ließ sich nichts lesen.', 6000); return; }
+  }
+  if(r.what === 'cards') return aiNewCards(s, f, topic, material || null, false, images);
 
   const i = addItem(f, 'note', topic, {content:''});
   go({view:'item', s:s.id, f:f.id, i:i.id});
-  const signal = ai.start('Die KI schreibt deinen Lernzettel…', i.id);
+  const msg = copy ? 'Die KI überträgt deine Dateien in einen Lernzettel…' : 'Die KI schreibt deinen Lernzettel…';
+  const signal = ai.start(msg, i.id);
   try{
-    const {text, truncated} = await sample(notePrompt({s, topic, material, size:r.size, extra}), {
-      signal, modelTier:'default',
-      onText: ({text}) => { ai.setMsg('Die KI schreibt deinen Lernzettel…'); streamInto(i, text); }
+    const {text, truncated} = await sample(notePrompt({s, topic, material, size:r.size, extra, copy, nImages:images.length}), {
+      signal, modelTier:'default', ...(images.length ? {images} : {}),
+      onText: ({text}) => streamInto(i, text)
     });
     streamInto(i, text); touched(i);
-    if(truncated) toast('Der Lernzettel wurde abgeschnitten – wähle „Kompakt“ oder ein engeres Thema.');
+    if(truncated) toast(copy ? 'Der Lernzettel wurde abgeschnitten – übernimm weniger Dateien auf einmal.' : 'Der Lernzettel wurde abgeschnitten – wähle „Kompakt“ oder ein engeres Thema.', 6000);
   } catch(e){
     if(e.text) streamInto(i, e.text);
     touched(i); toast(aiErr(e), 6000); ai.end(); return;
@@ -885,10 +969,10 @@ function streamInto(i, text){
     if(pv) pv.innerHTML = md(text);
   }
 }
-async function aiNewCards(s, f, topic, source, stayOnNote){
+async function aiNewCards(s, f, topic, source, stayOnNote, images = []){
   const signal = ai.start('Die KI erstellt Karteikarten…');
   try{
-    const arr = cleanCards(await sample.json(cardsPrompt({s, topic, source, n: source ? '12 bis 20' : '15'}), {signal, modelTier:'default'}));
+    const arr = cleanCards(await sample.json(cardsPrompt({s, topic, source, n: source || images.length ? '12 bis 20' : '15', nImages:images.length}), {signal, modelTier:'default', ...(images.length ? {images} : {})}));
     if(!arr.length) throw {code:'invalid_json'};
     const i = addItem(f, 'cards', `${topic} – Karteikarten`, {cards:arr});
     ai.end();
@@ -946,6 +1030,200 @@ async function aiAsk(){
     answers[i.id] = text;
   } catch(e){ answers[i.id] = (e.text ? e.text + '\n\n' : '') + aiErr(e); }
   ai.end(); const box = $('#askq'); if(box) box.value = '';
+}
+
+/* =========================================================
+   Dateien in Mappen
+   ========================================================= */
+const MAX_TEXT = 120000;          // so viel Text geht höchstens an die KI
+const MAX_FILE_TEXT = 100000;     // so viel Text wird je Datei gespeichert
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+const MAMMOTH = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+const scripts = {};
+function loadScript(src){
+  return scripts[src] ||= new Promise((res, rej) => {
+    const el = document.createElement('script'); el.src = src; el.onload = res;
+    el.onerror = () => { delete scripts[src]; rej(new Error('Bibliothek nicht ladbar')); };
+    document.head.appendChild(el);
+  });
+}
+async function pdfLib(){
+  await loadScript(PDFJS + 'pdf.min.js');
+  await loadScript(PDFJS + 'pdf.worker.min.js');   // läuft im Hauptfenster, kein Web Worker nötig
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+  return window.pdfjsLib;
+}
+async function openPdf(blob){ const lib = await pdfLib(); return lib.getDocument({data: new Uint8Array(await blob.arrayBuffer())}).promise; }
+async function extractPdf(file){
+  const doc = await openPdf(file); let text = '', chars = 0;
+  for(let p = 1; p <= doc.numPages; p++){
+    const tc = await (await doc.getPage(p)).getTextContent();
+    let page = '';
+    for(const it of tc.items){ page += it.str + (it.hasEOL ? '\n' : ' '); }
+    page = page.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    chars += page.replace(/\s/g, '').length;
+    text += (doc.numPages > 1 ? `\n[Seite ${p}]\n` : '') + page + '\n';
+  }
+  return {text: text.trim(), pages: doc.numPages, scanned: chars < 30 * doc.numPages};
+}
+async function renderPdfPages(blob, max, width = 1400){
+  const doc = await openPdf(blob), out = [];
+  for(let p = 1; p <= Math.min(doc.numPages, max); p++){
+    const page = await doc.getPage(p), v1 = page.getViewport({scale:1});
+    const vp = page.getViewport({scale: Math.min(2.5, width / v1.width)});
+    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({canvasContext: ctx, viewport: vp}).promise;
+    out.push(await new Promise(r => c.toBlob(r, 'image/jpeg', .82)));
+  }
+  return out;
+}
+async function extractDocx(file){
+  await loadScript(MAMMOTH);
+  return (await window.mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value.replace(/\n{3,}/g, '\n\n').trim();
+}
+async function downscale(blob, max = 1600, q = .82){
+  const bmp = await createImageBitmap(blob);
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(bmp, 0, 0, c.width, c.height);
+  return new Promise(r => c.toBlob(r, 'image/jpeg', q));
+}
+const toDataURL = blob => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+function fileKind(file){
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if(ext === 'pdf' || file.type === 'application/pdf') return 'pdf';
+  if(ext === 'docx') return 'docx';
+  if(['txt','md','csv'].includes(ext) || file.type.startsWith('text/')) return 'text';
+  if(file.type.startsWith('image/') || ['jpg','jpeg','png','webp','gif'].includes(ext)) return 'image';
+  return null;
+}
+const blobURL = x => x.assetId ? '/_blob/' + x.assetId : x.data || null;
+async function getBlob(x){ const u = blobURL(x); if(!u) throw new Error('kein Original'); return (await fetch(u)).blob(); }
+
+async function readFile(file){
+  const kind = fileKind(file);
+  if(!kind){ toast(`„${file.name}“: Dieses Format geht nicht. Speichere es als PDF und lade es dann hoch.`, 6000); return null; }
+  if(file.size > 20 * 1024 * 1024){ toast(`„${file.name}“ ist größer als 20 MB.`, 6000); return null; }
+  const x = {id:uid(), name:file.name, kind, size:file.size, added:Date.now(), text:'', pages:0};
+  let store = file;
+  if(kind === 'pdf'){ const r = await extractPdf(file); x.pages = r.pages; x.scanned = r.scanned; x.text = r.scanned ? '' : r.text; }
+  else if(kind === 'docx') x.text = await extractDocx(file);
+  else if(kind === 'text') x.text = (await file.text()).trim();
+  else { store = await downscale(file, 2000, .85); x.size = store.size; }
+  if(x.text.length > MAX_FILE_TEXT){ x.text = x.text.slice(0, MAX_FILE_TEXT); x.cut = true; }
+  if(assets){
+    try { x.assetId = (await assets.upload(store, kind === 'text' ? {contentType:'text/plain'} : undefined)).id; }
+    catch(e){ /* unten: Ersatz ohne Cloud-Original */ }
+  }
+  if(!x.assetId){
+    // Ohne Datei-Speicher: Bilder klein als Daten behalten, eingescannte PDFs als Seitenbilder
+    if(kind === 'image') x.data = await toDataURL(await downscale(file, 1400, .75));
+    if(kind === 'pdf' && x.scanned) x.pageImgs = await Promise.all((await renderPdfPages(file, 6, 1200)).map(toDataURL));
+  }
+  return x;
+}
+async function addFiles(list){
+  const f = getF(getS(route.s), route.f), files = [...list];
+  if(!f || !files.length) return;
+  if(ai.busy){ toast('Bitte kurz warten, bis die KI fertig ist.'); return; }
+  let ok = 0;
+  ai.start('Dateien werden gelesen…');
+  for(const [n, file] of files.entries()){
+    ai.setMsg(`Lese ${n+1}/${files.length}: ${file.name}…`);
+    try { const x = await readFile(file); if(x){ f.files.push(x); ok++; save(); } }
+    catch(e){ toast(`„${file.name}“ konnte nicht gelesen werden.`, 6000); }
+  }
+  ai.end();
+  if(ok) toast(`${ok} Datei${ok===1?'':'en'} hinzugefügt ✓ – mit ✨ machst du einen Lernzettel daraus.`, 5000);
+}
+function bindFolder(){
+  if(route.view !== 'folder') return;
+  const drop = $('#drop'), inp = $('#fileIn'); if(!drop) return;
+  inp.onchange = () => { addFiles(inp.files); inp.value = ''; };
+  drop.onkeydown = e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); inp.click(); } };
+  const main = $('#main');
+  main.ondragover = e => { if(route.view !== 'folder') return; e.preventDefault(); $('#drop')?.classList.add('over'); };
+  main.ondragleave = e => { if(e.target === main || e.target.id === 'drop') $('#drop')?.classList.remove('over'); };
+  main.ondrop = e => { if(route.view !== 'folder') return; e.preventDefault(); $('#drop')?.classList.remove('over'); addFiles(e.dataTransfer.files); };
+}
+
+/* Material für die KI: Text direkt, Bilder und Scans als Bilder */
+async function gatherFiles(chosen, extra){
+  const parts = [], images = [], skipped = [];
+  const max = imgLimits?.maxCount || 0, maxBytes = imgLimits?.maxInputBytes || Infinity;
+  for(const x of chosen){
+    if(x.text){ parts.push(`=== Datei: ${x.name} ===\n${x.text}`); continue; }
+    if(x.kind === 'image' || (x.kind === 'pdf' && x.scanned)){
+      if(!max){ skipped.push(x.name); continue; }
+      let blobs = [];
+      if(x.kind === 'image') blobs = [await getBlob(x)];
+      else if(x.assetId) blobs = await renderPdfPages(await getBlob(x), Math.max(0, max - images.length));
+      else blobs = await Promise.all((x.pageImgs || []).map(d => fetch(d).then(r => r.blob())));
+      for(const b of blobs){ if(images.length < max && b.size <= maxBytes) images.push(b); else { skipped.push(x.name); break; } }
+    }
+  }
+  let material = [extra, ...parts].filter(Boolean).join('\n\n');
+  if(material.length > MAX_TEXT){
+    material = material.slice(0, MAX_TEXT) + '\n[… Rest gekürzt]';
+    toast('Das Material ist sehr lang – es wird nur der Anfang verwendet. Wähle weniger Dateien auf einmal.', 7000);
+  }
+  if(skipped.length) toast(`Nicht alle Bilder/Seiten konnten mit: ${[...new Set(skipped)].join(', ')}. Nutze „Text erkennen“ bei der Datei oder wähle weniger aus.`, 8000);
+  return {material, images};
+}
+
+/* Datei ansehen & Aktionen */
+function curFile(id){ return getF(getS(route.s), route.f)?.files.find(x => x.id === id); }
+function closeModal(){ document.querySelector('.modal-bg')?.remove(); }
+function viewFile(id){
+  const x = curFile(id); if(!x) return;
+  const url = blobURL(x);
+  const scan = x.kind === 'image' || (x.kind === 'pdf' && x.scanned);
+  const img = x.kind === 'image' && url ? `<img class="prev" src="${esc(url)}" alt="${esc(x.name)}">` : '';
+  const txt = x.text ? `<div class="filetext">${esc(x.text.slice(0, 30000))}${x.text.length > 30000 || x.cut ? '\n\n[… gekürzt angezeigt]' : ''}</div>`
+    : scan ? `<p>Diese Datei ist ein Bild bzw. eine eingescannte Seite. Die KI kann sie direkt lesen – oder du lässt mit „Text erkennen“ den Text abschreiben, dann ist er auch durchsuchbar.</p>` : `<p>Kein Text gefunden.</p>`;
+  modal(x.name, `
+    <p>${fileInfo(x)} · ${(x.size/1024/1024).toFixed(1)} MB · hinzugefügt am ${fmtDate(x.added)}</p>
+    ${img}${txt}
+    <div class="acts" style="justify-content:flex-start;margin-bottom:14px">
+      <button type="button" class="btn small ai" onclick="closeModal();aiCreate(['${x.id}'])">✨ Lernzettel mit KI</button>
+      ${x.text ? `<button type="button" class="btn small" onclick="closeModal();fileToNote('${x.id}')">📝 Ohne KI übernehmen</button>` : ''}
+      ${!x.text && scan ? `<button type="button" class="btn small ai" onclick="closeModal();ocrFile('${x.id}')">✨ Text erkennen</button>` : ''}
+      ${url ? `<button type="button" class="btn small" onclick="saveOriginal('${x.id}')">⬇ Original speichern</button>` : ''}
+    </div>`, 'Schließen', {wide:true});
+}
+async function saveOriginal(id){
+  const x = curFile(id); if(!x) return;
+  try{
+    const blob = await getBlob(x);
+    if(inClaude){ if(!downloads) throw 0; await downloads.save({filename:x.name, data:blob}); }
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = x.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+  } catch(e){ if(e?.code !== 'cancelled') toast('Das Original konnte nicht gespeichert werden.'); }
+}
+function fileToNote(id){
+  const s = getS(route.s), f = getF(s, route.f), x = curFile(id); if(!x?.text) return;
+  const title = x.name.replace(/\.[^.]+$/, '');
+  const i = addItem(f, 'note', title, {content:`# ${title}\n\n${x.text}`});
+  go({view:'item', s:s.id, f:f.id, i:i.id}); toast('Als Lernzettel übernommen – mit „✨ Überarbeiten“ kannst du ihn ordnen lassen.', 5000);
+}
+async function ocrFile(id){
+  if(!aiReady()) return;
+  const x = curFile(id); if(!x) return;
+  if(!imgLimits){ toast('Bilder können in dieser Ansicht nicht an die KI geschickt werden.'); return; }
+  const signal = ai.start(`Die KI liest „${x.name}“…`);
+  try{
+    const {images} = await gatherFiles([x], '');
+    if(!images.length) throw {code:'empty_completion'};
+    const {text} = await sample(`Schreibe den gesamten Text auf ${images.length === 1 ? 'diesem Bild' : 'diesen ' + images.length + ' Seiten'} vollständig und wortgetreu ab (Arbeitsblatt, Buchseite, Tafelbild oder Mitschrift). Behalte Überschriften, Aufzählungen und Absätze als einfache Zeilen bei, Tabellen als | Spalte | Spalte |. Beschreibe Grafiken, Karten oder Diagramme in einer Zeile in eckigen Klammern. Gib nur den abgeschriebenen Text aus.`, {signal, modelTier:'default', images});
+    x.text = text.slice(0, MAX_FILE_TEXT); x.ocr = true; save();
+    ai.end(); toast('Text erkannt ✓'); viewFile(id);
+  } catch(e){ ai.end(); toast(aiErr(e), 6000); }
+}
+async function deleteFile(id){
+  const f = getF(getS(route.s), route.f), x = curFile(id); if(!x) return;
+  if(!await confirmBox(`Datei „${x.name}“ löschen? Lernzettel, die daraus entstanden sind, bleiben erhalten.`)) return;
+  if(x.assetId && assets) assets.delete(x.assetId).catch(() => {});
+  f.files = f.files.filter(y => y !== x); save(); render();
 }
 
 render();
