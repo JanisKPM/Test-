@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lernmappe</title>
+<style>
+:root{
+  --bg:#f5f6f8;--panel:#ffffff;--panel2:#f0f2f5;--text:#1d2330;--muted:#6b7385;--line:#e2e5eb;
+  --accent:#3b6fe0;--danger:#d64545;--ok:#2f9e5b;--warn:#e0a020;--shadow:0 1px 3px rgba(0,0,0,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171d;--panel:#1c2028;--panel2:#242934;--text:#e6e9ef;--muted:#9099ab;--line:#2e3440;--shadow:none;
+  }
+}
+:root[data-theme="dark"]{--bg:#14171d;--panel:#1c2028;--panel2:#242934;--text:#e6e9ef;--muted:#9099ab;--line:#2e3440;--shadow:none}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:250px 1fr;height:100vh}
+/* Sidebar */
+aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:auto}
+.brand{padding:18px 18px 10px;font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.brand span{font-size:20px}
+.search{margin:6px 14px 10px}
+.search input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+.navlabel{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:10px 18px 4px}
+.nav button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:8px 18px;text-align:left}
+.nav button:hover{background:var(--panel2)}
+.nav button.active{background:var(--panel2);font-weight:600}
+.dot{width:10px;height:10px;border-radius:3px;flex:none}
+.tag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--panel2);color:var(--muted);margin-left:auto;border:1px solid var(--line)}
+.sidefoot{margin-top:auto;padding:12px 14px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line)}
+/* Main */
+main{overflow:auto;padding:24px 32px 60px}
+.crumbs{color:var(--muted);font-size:13px;margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap}
+.crumbs a{color:var(--muted);cursor:pointer;text-decoration:none}
+.crumbs a:hover{color:var(--accent)}
+.head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.head h1{font-size:24px;margin:0;flex:1;min-width:200px}
+.btn{border:1px solid var(--line);background:var(--panel);padding:7px 12px;border-radius:8px;box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--danger)}
+.btn.small{padding:4px 9px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;box-shadow:var(--shadow);position:relative;transition:transform .08s}
+.card:hover{transform:translateY(-2px);border-color:var(--c,var(--accent))}
+.card .bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:var(--c,var(--accent))}
+.card h3{margin:0 0 4px;font-size:16px}
+.card .meta{color:var(--muted);font-size:13px}
+.folder-ic{font-size:26px;line-height:1;margin-bottom:8px}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;cursor:pointer}
+.row:hover{border-color:var(--accent)}
+.row .ic{font-size:20px}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .t small{color:var(--muted)}
+.empty{color:var(--muted);text-align:center;padding:40px 20px;border:2px dashed var(--line);border-radius:12px}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:8px 14px;border-bottom:2px solid transparent;color:var(--muted)}
+.tabs button.on{color:var(--text);border-color:var(--accent);font-weight:600}
+/* Editor */
+.title-in{font-size:22px;font-weight:700;border:0;background:none;width:100%;padding:4px 0;outline:none}
+.editor{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.editor textarea{width:100%;min-height:60vh;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:14px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.preview{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;min-height:60vh;overflow:auto}
+.preview h1,.preview h2,.preview h3{margin:.8em 0 .3em}
+.preview h1{font-size:22px;border-bottom:2px solid var(--c,var(--accent));padding-bottom:4px}
+.preview h2{font-size:18px;color:var(--c,var(--accent))}
+.preview h3{font-size:16px}
+.preview mark{background:#ffe86b;color:#222;padding:0 2px;border-radius:3px}
+.preview code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:13px}
+.preview .merke{border-left:4px solid var(--warn);background:var(--panel2);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0}
+.preview .merke::before{content:"💡 Merke: ";font-weight:700}
+.preview table{border-collapse:collapse;margin:8px 0}
+.preview td,.preview th{border:1px solid var(--line);padding:4px 10px}
+.hint{color:var(--muted);font-size:12.5px;margin-top:6px}
+.saved{color:var(--ok);font-size:13px}
+/* Flashcards */
+.qa{display:grid;grid-template-columns:28px 1fr 1fr 34px;gap:8px;align-items:start;margin-bottom:8px}
+.qa textarea{width:100%;min-height:54px;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:8px;resize:vertical}
+.qa .n{color:var(--muted);padding-top:8px;text-align:right}
+.learn{max-width:640px;margin:0 auto;text-align:center}
+.flip{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--c,var(--accent));border-radius:14px;min-height:240px;padding:30px;display:flex;flex-direction:column;justify-content:center;font-size:19px;cursor:pointer;box-shadow:var(--shadow);white-space:pre-wrap}
+.flip small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.progress{height:6px;background:var(--panel2);border-radius:3px;margin:14px 0;overflow:hidden}
+.progress div{height:100%;background:var(--c,var(--accent))}
+.learn .actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:var(--panel2);color:var(--muted);margin-left:6px}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:10;padding:16px}
+.modal{background:var(--panel);border-radius:12px;padding:20px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.modal h3{margin:0 0 12px}
+.modal input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);margin-bottom:14px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px}
+.menu-toggle{display:none}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{position:fixed;inset:0 30% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s}
+  aside.open{transform:none}
+  .menu-toggle{display:inline-block}
+  main{padding:16px}
+  .editor{grid-template-columns:1fr}
+  .qa{grid-template-columns:1fr 34px}.qa .n{display:none}
+}
+@media print{aside,.head .btn,.tabs,.crumbs,.no-print{display:none!important}.app{display:block}main{overflow:visible}.editor{display:block}.editor textarea{display:none}.preview{border:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="side"></aside>
+  <main id="main"></main>
+</div>
+<input type="file" id="importFile" accept=".json" hidden>
+<script>
+/* ---------- Daten ---------- */
+const KEY = 'lernmappe-v1';
+const DEFAULT_SUBJECTS = [
+  {name:'Geschichte', kind:'LK', color:'#b5651d', icon:'🏛️'},
+  {name:'Politik',    kind:'LK', color:'#3b6fe0', icon:'⚖️'},
+  {name:'Englisch',   kind:'LK', color:'#c0392b', icon:'🇬🇧'},
+  {name:'Mathe',      kind:'P4', color:'#8e44ad', icon:'📐'},
+  {name:'Deutsch',    kind:'P5', color:'#d4a017', icon:'📖'},
+  {name:'Biologie',   kind:'',   color:'#2f9e5b', icon:'🧬'},
+  {name:'Sport',      kind:'',   color:'#e67e22', icon:'🏃'},
+  {name:'Kunst',      kind:'',   color:'#d63384', icon:'🎨'},
+];
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+
+function freshState(){
+  return {subjects: DEFAULT_SUBJECTS.map(s => ({id:uid(), ...s, folders:[]}))};
+}
+let state;
+try { state = JSON.parse(localStorage.getItem(KEY)) || freshState(); } catch(e){ state = freshState(); }
+let storageOK = true;
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ if(storageOK){ storageOK=false; alert('Speichern im Browser nicht möglich. Bitte regelmäßig über „Export“ sichern.'); } }
+}
+
+/* ---------- Navigation ---------- */
+let route = {view:'home'};       // {view, s, f, i, mode}
+let query = '';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const getS = id => state.subjects.find(s => s.id === id);
+const getF = (s,id) => s?.folders.find(f => f.id === id);
+const getI = (f,id) => f?.items.find(i => i.id === id);
+const fmtDate = t => new Date(t).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+const kindLabel = s => s.kind ? s.kind + ' ' : '';
+function go(r){ route = r; $('#side').classList.remove('open'); render(); $('#main').scrollTop = 0; }
+
+/* ---------- Markdown-Light ---------- */
+function inline(t){
+  return t
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+    .replace(/==([^=]+)==/g,'<mark>$1</mark>')
+    .replace(/__([^_]+)__/g,'<u>$1</u>');
+}
+function md(src){
+  const lines = esc(src).split('\n'); let out = '', list = null, table = null;
+  const close = () => { if(list){ out += `</${list}>`; list = null; } if(table){ out += '</table>'; table = null; } };
+  for(const raw of lines){
+    const l = raw.trimEnd();
+    let m;
+    if(/^\|.*\|$/.test(l)){
+      if(/^\|[\s\-:|]+\|$/.test(l)) continue;
+      if(list){ out += `</${list}>`; list=null; }
+      const cells = l.slice(1,-1).split('|').map(c => inline(c.trim()));
+      if(!table){ table = true; out += '<table><tr>' + cells.map(c=>`<th>${c}</th>`).join('') + '</tr>'; }
+      else out += '<tr>' + cells.map(c=>`<td>${c}</td>`).join('') + '</tr>';
+      continue;
+    }
+    if(table){ out += '</table>'; table = null; }
+    if((m = l.match(/^(#{1,3})\s+(.*)/))){ close(); out += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; }
+    else if((m = l.match(/^&gt;\s?(.*)/))){ close(); out += `<div class="merke">${inline(m[1])}</div>`; }
+    else if((m = l.match(/^\s*[-*]\s+(.*)/))){ if(list!=='ul'){ close(); out += '<ul>'; list='ul'; } out += `<li>${inline(m[1])}</li>`; }
+    else if((m = l.match(/^\s*\d+[.)]\s+(.*)/))){ if(list!=='ol'){ close(); out += '<ol>'; list='ol'; } out += `<li>${inline(m[1])}</li>`; }
+    else if(l === '---'){ close(); out += '<hr>'; }
+    else if(l === ''){ close(); }
+    else { close(); out += `<p>${inline(l)}</p>`; }
+  }
+  close();
+  return out;
+}
+
+/* ---------- Modal ---------- */
+function ask(title, value='', okText='Speichern'){
+  return new Promise(res => {
+    const bg = document.createElement('div'); bg.className = 'modal-bg';
+    bg.innerHTML = `<div class="modal"><h3>${esc(title)}</h3><input value="${esc(value)}"><div class="acts"><button class="btn" data-x>Abbrechen</button><button class="btn primary" data-ok>${esc(okText)}</button></div></div>`;
+    document.body.appendChild(bg);
+    const inp = bg.querySelector('input'); inp.focus(); inp.select();
+    const done = v => { bg.remove(); res(v); };
+    bg.querySelector('[data-ok]').onclick = () => done(inp.value.trim() || null);
+    bg.querySelector('[data-x]').onclick = () => done(null);
+    bg.onclick = e => { if(e.target === bg) done(null); };
+    inp.onkeydown = e => { if(e.key==='Enter') done(inp.value.trim() || null); if(e.key==='Escape') done(null); };
+  });
+}
+
+/* ---------- Sidebar ---------- */
+function renderSide(){
+  const cur = route.s;
+  $('#side').innerHTML = `
+    <div class="brand" onclick="go({view:'home'})"><span>📚</span> Lernmappe</div>
+    <div class="search"><input id="q" placeholder="🔍 Alles durchsuchen…" value="${esc(query)}"></div>
+    <div class="navlabel">Fächer</div>
+    <div class="nav">
+      ${state.subjects.map(s => `
+        <button class="${s.id===cur?'active':''}" onclick="go({view:'subject',s:'${s.id}'})">
+          <span class="dot" style="background:${s.color}"></span>${esc(s.name)}
+          ${s.kind?`<span class="tag">${s.kind}</span>`:''}
+        </button>`).join('')}
+    </div>
+    <div class="sidefoot">
+      <button class="btn small" onclick="exportData()" title="Alle Daten als Datei sichern">⬇ Export</button>
+      <button class="btn small" onclick="$('#importFile').click()" title="Gesicherte Datei laden">⬆ Import</button>
+      <button class="btn small" onclick="toggleTheme()" title="Hell/Dunkel">🌓</button>
+    </div>`;
+  const q = $('#q');
+  q.oninput = () => { query = q.value; if(query.trim()) go({view:'search'}); else go({view:'home'}); setTimeout(()=>{ const n=$('#q'); n.focus(); n.setSelectionRange(n.value.length,n.value.length); }); };
+}
+
+/* ---------- Ansichten ---------- */
+function crumbs(parts){
+  return `<div class="crumbs">${parts.map(([t,r]) => r ? `<a onclick='go(${JSON.stringify(r)})'>${esc(t)}</a>` : `<span>${esc(t)}</span>`).join('<span>›</span>')}</div>`;
+}
+const menuBtn = `<button class="btn menu-toggle" onclick="$('#side').classList.toggle('open')">☰</button>`;
+const filled = i => i.cards.filter(c => (c.q||'').trim() || (c.a||'').trim());
+const countItems = s => s.folders.reduce((n,f) => n + f.items.length, 0);
+
+function viewHome(){
+  const recent = [];
+  state.subjects.forEach(s => s.folders.forEach(f => f.items.forEach(i => recent.push({s,f,i}))));
+  recent.sort((a,b) => b.i.updated - a.i.updated);
+  return `
+    <div class="head">${menuBtn}<h1>Meine Fächer</h1></div>
+    <div class="grid">
+      ${state.subjects.map(s => `
+        <div class="card" style="--c:${s.color}" onclick="go({view:'subject',s:'${s.id}'})">
+          <div class="bar"></div>
+          <div class="folder-ic">${s.icon||'📁'}</div>
+          <h3>${esc(s.name)} ${s.kind?`<span class="badge">${s.kind}</span>`:''}</h3>
+          <div class="meta">${s.folders.length} Mappe${s.folders.length===1?'':'n'} · ${countItems(s)} Einträge</div>
+        </div>`).join('')}
+    </div>
+    <h2 style="font-size:17px;margin:32px 0 12px">Zuletzt bearbeitet</h2>
+    ${recent.length ? `<div class="list">${recent.slice(0,6).map(itemRow).join('')}</div>`
+      : `<div class="empty">Noch nichts angelegt. Wähle ein Fach, erstelle eine Mappe (z. B. „Weimarer Republik“) und leg los!</div>`}`;
+}
+
+function itemRow({s,f,i}){
+  const ic = i.type === 'cards' ? '🗂️' : '📝';
+  const sub = i.type === 'cards' ? `${filled(i).length} Karteikarten` : 'Lernzettel';
+  return `<div class="row" onclick="go({view:'item',s:'${s.id}',f:'${f.id}',i:'${i.id}'})">
+    <span class="ic">${ic}</span>
+    <div class="t"><b>${esc(i.title)}</b><small><span class="dot" style="display:inline-block;background:${s.color};margin-right:5px"></span>${esc(s.name)} › ${esc(f.name)} · ${sub} · ${fmtDate(i.updated)}</small></div>
+  </div>`;
+}
+
+function viewSubject(){
+  const s = getS(route.s); if(!s) return viewHome();
+  return `
+    ${crumbs([['Fächer',{view:'home'}],[kindLabel(s)+s.name]])}
+    <div class="head">${menuBtn}<h1>${s.icon||''} ${esc(kindLabel(s)+s.name)}</h1>
+      <button class="btn primary" onclick="newFolder('${s.id}')">＋ Neue Mappe</button>
+    </div>
+    ${s.folders.length ? `<div class="grid">${s.folders.map(f => `
+      <div class="card" style="--c:${s.color}" onclick="go({view:'folder',s:'${s.id}',f:'${f.id}'})">
+        <div class="bar"></div>
+        <div class="folder-ic">📁</div>
+        <h3>${esc(f.name)}</h3>
+        <div class="meta">${f.items.filter(i=>i.type==='note').length} Lernzettel · ${f.items.filter(i=>i.type==='cards').length} Kartensätze</div>
+      </div>`).join('')}</div>`
+    : `<div class="empty">Noch keine Mappen in ${esc(s.name)}.<br>Lege eine Mappe pro Thema oder Semester an, z. B. „Q1 – Industrialisierung“.</div>`}`;
+}
+
+function viewFolder(){
+  const s = getS(route.s), f = getF(s, route.f); if(!f) return viewSubject();
+  const items = [...f.items].sort((a,b) => b.updated - a.updated);
+  return `
+    ${crumbs([['Fächer',{view:'home'}],[kindLabel(s)+s.name,{view:'subject',s:s.id}],[f.name]])}
+    <div class="head">${menuBtn}<h1>📁 ${esc(f.name)}</h1>
+      <button class="btn primary" onclick="newItem('note')">＋ Lernzettel</button>
+      <button class="btn primary" onclick="newItem('cards')">＋ Karteikarten</button>
+      <button class="btn small" onclick="renameFolder()">Umbenennen</button>
+      <button class="btn small danger" onclick="deleteFolder()">Löschen</button>
+    </div>
+    ${items.length ? `<div class="list">${items.map(i => itemRow({s,f,i})).join('')}</div>`
+      : `<div class="empty">Diese Mappe ist leer.<br>📝 <b>Lernzettel</b> für Zusammenfassungen · 🗂️ <b>Karteikarten</b> zum Abfragen</div>`}`;
+}
+
+function viewItem(){
+  const s = getS(route.s), f = getF(s, route.f), i = getI(f, route.i); if(!i) return viewFolder();
+  const head = `${crumbs([['Fächer',{view:'home'}],[kindLabel(s)+s.name,{view:'subject',s:s.id}],[f.name,{view:'folder',s:s.id,f:f.id}],[i.title]])}
+    <div class="head no-print">${menuBtn}
+      <input class="title-in" id="title" value="${esc(i.title)}" style="flex:1">
+      <span class="saved" id="saved"></span>
+      ${i.type==='note' ? `<button class="btn small" onclick="window.print()">🖨 Drucken</button>` : ''}
+      <button class="btn small danger" onclick="deleteItem()">Löschen</button>
+    </div>`;
+  if(i.type === 'note'){
+    return head + `
+      <div class="editor" style="--c:${s.color}">
+        <div class="no-print"><textarea id="ta" placeholder="Schreibe hier deinen Lernzettel…">${esc(i.content)}</textarea>
+          <div class="hint"># Überschrift · ## Unterpunkt · **fett** · *kursiv* · ==markiert== · - Liste · 1. Aufzählung · &gt; Merksatz · | Tabelle | … |</div></div>
+        <div class="preview" id="pv">${md(i.content)}</div>
+      </div>`;
+  }
+  const mode = route.mode || (filled(i).length ? 'learn' : 'edit');
+  return head + `
+    <div class="tabs no-print">
+      <button class="${mode==='learn'?'on':''}" onclick="go({...route,mode:'learn'})">🎯 Lernen</button>
+      <button class="${mode==='edit'?'on':''}" onclick="go({...route,mode:'edit'})">✏️ Karten bearbeiten (${i.cards.length})</button>
+    </div>
+    <div style="--c:${s.color}">${mode==='edit' ? cardsEditor(i) : learnView(i)}</div>`;
+}
+
+function cardsEditor(i){
+  return `
+    <div class="qa" style="font-weight:600;color:var(--muted);font-size:13px"><span></span><span>Vorderseite (Frage / Begriff)</span><span>Rückseite (Antwort)</span><span></span></div>
+    ${i.cards.map((c,k) => `
+      <div class="qa">
+        <span class="n">${k+1}</span>
+        <textarea data-k="${k}" data-side="q" placeholder="Frage">${esc(c.q)}</textarea>
+        <textarea data-k="${k}" data-side="a" placeholder="Antwort">${esc(c.a)}</textarea>
+        <button class="btn small danger" title="Karte löschen" onclick="delCard(${k})">✕</button>
+      </div>`).join('')}
+    <button class="btn" onclick="addCard()">＋ Karte hinzufügen</button>`;
+}
+
+/* Lernmodus: Karten, die man nicht wusste, kommen erneut dran */
+let session = null;
+function startSession(i, onlyWrong){
+  const pool = i.cards.map((c,k)=>k).filter(k => (i.cards[k].q||i.cards[k].a) && (!onlyWrong || (i.cards[k].box||0) === 0));
+  for(let a = pool.length-1; a > 0; a--){ const b = Math.floor(Math.random()*(a+1)); [pool[a],pool[b]] = [pool[b],pool[a]]; }
+  session = {id:i.id, queue:pool, total:pool.length, right:0, wrong:0, flipped:false};
+}
+function learnView(i){
+  if(!filled(i).length) return `<div class="empty">Noch keine Karten. Wechsle zu „Karten bearbeiten“.</div>`;
+  if(!session || session.id !== i.id) startSession(i, false);
+  const all = filled(i), known = all.filter(c => (c.box||0) > 0).length;
+  const stats = `<p style="color:var(--muted)">Insgesamt gewusst: ${known} / ${all.length} Karten</p>`;
+  if(!session.queue.length){
+    return `<div class="learn"><div class="flip" style="cursor:default">🎉<br><b>Runde geschafft!</b><br><span style="font-size:15px;color:var(--muted)">Beim ersten Versuch gewusst: ${session.right} · nochmal wiederholt: ${session.wrong}</span></div>
+      ${stats}<div class="actions"><button class="btn primary" onclick="restart(false)">Alle nochmal</button>
+      ${known < all.length ? `<button class="btn" onclick="restart(true)">Nur Ungewusste</button>`:''}</div></div>`;
+  }
+  const c = i.cards[session.queue[0]];
+  const done = session.total - session.queue.length;
+  return `<div class="learn">
+    <div class="progress"><div style="width:${session.total ? done/session.total*100 : 0}%"></div></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:10px">Noch ${session.queue.length} Karte${session.queue.length===1?'':'n'} in dieser Runde</div>
+    <div class="flip" onclick="flipCard()">
+      <small>${session.flipped ? 'Antwort' : 'Frage'} · zum Umdrehen klicken / Leertaste</small>
+      ${esc(session.flipped ? c.a : c.q)}
+    </div>
+    <div class="actions">${session.flipped
+      ? `<button class="btn" style="color:var(--danger)" onclick="answer(false)">✗ Nicht gewusst (1)</button><button class="btn" style="color:var(--ok)" onclick="answer(true)">✓ Gewusst (2)</button>`
+      : `<button class="btn primary" onclick="flipCard()">Antwort zeigen</button>`}</div>
+    ${stats}
+  </div>`;
+}
+function curItem(){ const s=getS(route.s), f=getF(s,route.f); return getI(f,route.i); }
+function flipCard(){ session.flipped = !session.flipped; render(); }
+function answer(ok){
+  const i = curItem(), k = session.queue.shift(), c = i.cards[k];
+  if(ok){ if(!c._missed) session.right++; c.box = Math.min((c.box||0)+1, 5); delete c._missed; }
+  else { if(!c._missed) session.wrong++; c._missed = true; c.box = 0; session.queue.splice(Math.min(3, session.queue.length), 0, k); }
+  session.flipped = false; save(); render();
+}
+function restart(onlyWrong){ startSession(curItem(), onlyWrong); render(); }
+
+function viewSearch(){
+  const q = query.trim().toLowerCase(), hits = [];
+  state.subjects.forEach(s => s.folders.forEach(f => {
+    f.items.forEach(i => {
+      const txt = (i.title + ' ' + (i.type==='note' ? i.content : i.cards.map(c=>c.q+' '+c.a).join(' '))).toLowerCase();
+      if(txt.includes(q) || f.name.toLowerCase().includes(q)) hits.push({s,f,i});
+    });
+  }));
+  return `<div class="head">${menuBtn}<h1>Suche: „${esc(query)}“</h1></div>
+    ${hits.length ? `<div class="list">${hits.map(itemRow).join('')}</div>` : `<div class="empty">Keine Treffer.</div>`}`;
+}
+
+/* ---------- Render ---------- */
+function render(){
+  renderSide();
+  const v = {home:viewHome, subject:viewSubject, folder:viewFolder, item:viewItem, search:viewSearch}[route.view] || viewHome;
+  $('#main').innerHTML = v();
+  bindItem();
+}
+let saveTimer;
+function touched(){
+  const i = curItem(); i.updated = Date.now();
+  clearTimeout(saveTimer); const el = $('#saved'); if(el) el.textContent = '…';
+  saveTimer = setTimeout(() => { save(); const el=$('#saved'); if(el) el.textContent = '✓ gespeichert'; }, 400);
+}
+function bindItem(){
+  if(route.view !== 'item') return;
+  const i = curItem(); if(!i) return;
+  const t = $('#title'); if(t) t.oninput = () => { i.title = t.value || 'Ohne Titel'; touched(); };
+  const ta = $('#ta'); if(ta) ta.oninput = () => { i.content = ta.value; $('#pv').innerHTML = md(ta.value); touched(); };
+  document.querySelectorAll('.qa textarea').forEach(el => el.oninput = () => { i.cards[+el.dataset.k][el.dataset.side] = el.value; session = null; touched(); });
+}
+
+/* ---------- Aktionen ---------- */
+async function newFolder(sid){
+  const name = await ask('Neue Mappe', '', 'Anlegen'); if(!name) return;
+  const f = {id:uid(), name, items:[]}; getS(sid).folders.push(f); save();
+  go({view:'folder', s:sid, f:f.id});
+}
+async function renameFolder(){
+  const f = getF(getS(route.s), route.f);
+  const name = await ask('Mappe umbenennen', f.name); if(!name) return;
+  f.name = name; save(); render();
+}
+function deleteFolder(){
+  const s = getS(route.s), f = getF(s, route.f);
+  if(!confirm(`Mappe „${f.name}“ mit ${f.items.length} Einträgen wirklich löschen?`)) return;
+  s.folders = s.folders.filter(x => x !== f); save(); go({view:'subject', s:s.id});
+}
+async function newItem(type){
+  const f = getF(getS(route.s), route.f);
+  const title = await ask(type==='note' ? 'Neuer Lernzettel' : 'Neuer Kartensatz', '', 'Anlegen'); if(!title) return;
+  const i = {id:uid(), type, title, updated:Date.now()};
+  if(type === 'note') i.content = `# ${title}\n\n## Wichtige Begriffe\n- \n\n## Zusammenfassung\n\n> `;
+  else i.cards = [{q:'',a:''},{q:'',a:''},{q:'',a:''}];
+  f.items.push(i); save();
+  go({view:'item', s:route.s, f:f.id, i:i.id, mode: type==='cards' ? 'edit' : undefined});
+}
+function deleteItem(){
+  const f = getF(getS(route.s), route.f), i = getI(f, route.i);
+  if(!confirm(`„${i.title}“ wirklich löschen?`)) return;
+  f.items = f.items.filter(x => x !== i); save(); go({view:'folder', s:route.s, f:route.f});
+}
+function addCard(){ const i = curItem(); i.cards.push({q:'',a:''}); touched(); render(); const tas=document.querySelectorAll('.qa textarea'); tas[tas.length-2]?.focus(); }
+function delCard(k){ const i = curItem(); i.cards.splice(k,1); session = null; touched(); render(); }
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `lernmappe-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('#importFile').onchange = e => {
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try { const d = JSON.parse(r.result); if(!Array.isArray(d.subjects)) throw 0;
+      if(confirm('Aktuelle Daten durch die Datei ersetzen?')){ state = d; save(); go({view:'home'}); } }
+    catch(err){ alert('Die Datei ist keine gültige Lernmappe-Sicherung.'); }
+    e.target.value = '';
+  };
+  r.readAsText(file);
+};
+function toggleTheme(){
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem(KEY+'-theme', root.dataset.theme); } catch(e){}
+}
+try { const t = localStorage.getItem(KEY+'-theme'); if(t) document.documentElement.dataset.theme = t; } catch(e){}
+
+document.addEventListener('keydown', e => {
+  if(route.view !== 'item' || !session || ['TEXTAREA','INPUT'].includes(document.activeElement.tagName)) return;
+  if(!$('.flip')) return;
+  if(e.code === 'Space'){ e.preventDefault(); flipCard(); }
+  else if(session.flipped && e.key === '1') answer(false);
+  else if(session.flipped && e.key === '2') answer(true);
+});
+
+render();
+</script>
+</body>
+</html>
