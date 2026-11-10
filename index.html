@@ -108,18 +108,28 @@ h2.sec .btn{margin-left:auto}
 .editor textarea{width:100%;min-height:60vh;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:14px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
 .editor textarea[readonly]{opacity:.8}
 .preview{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;min-height:60vh;overflow:auto;min-width:0}
-.preview h1,.preview h2,.preview h3{margin:.8em 0 .3em}
-.preview h1{font-size:22px;border-bottom:2px solid var(--c,var(--accent));padding-bottom:4px}
-.preview h2{font-size:18px;color:var(--c,var(--accent))}
-.preview h3{font-size:16px}
-.preview mark,.answer mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
-.preview code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:13px}
+.md h1,.md h2,.md h3{margin:.8em 0 .3em;text-wrap:balance}
+.md h1{font-size:22px;border-bottom:2px solid var(--c,var(--accent));padding-bottom:4px}
+.md h2{font-size:18px;color:var(--c,var(--accent))}
+.md h3{font-size:16px}
+.md mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
+.md code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:13px}
 .merke{border-left:4px solid var(--warn);background:var(--panel2);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0}
 .merke::before{content:"💡 Merke: ";font-weight:700}
 .tbl{overflow-x:auto}
-.preview table,.answer table{border-collapse:collapse;margin:8px 0}
-.preview td,.preview th,.answer td,.answer th{border:1px solid var(--line);padding:4px 10px;text-align:left;vertical-align:top}
-.preview th,.answer th{background:var(--panel2)}
+.md table{border-collapse:collapse;margin:8px 0}
+.md td,.md th{border:1px solid var(--line);padding:4px 10px;text-align:left;vertical-align:top}
+.md th{background:var(--panel2)}
+/* Ansicht wie ein gedrucktes Blatt (immer hell, wie ein PDF) */
+.paper-wrap{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:28px 16px;overflow-x:auto}
+.paper{--panel2:#eef0f5;--line:#d9dde6;--text:#1b2130;--muted:#677087;--mark:#ffe46b;--warn:#d98b12;color-scheme:light;
+  background:#fff;color:#1b2130;max-width:210mm;min-height:60vh;margin:0 auto;padding:18mm 18mm 20mm;box-shadow:0 4px 24px rgba(20,30,60,.14);border-radius:3px;font-size:15.5px;line-height:1.6}
+.paper-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#677087;border-bottom:1px solid #d9dde6;padding-bottom:6px;margin-bottom:6px}
+.paper .md > h1:first-child{margin-top:.4em}
+.paper.pdfmode{box-shadow:none;border-radius:0;padding:0;max-width:none;min-height:0;font-size:14px}
+.notebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.notebar .tabs{border:0;margin:0}
+.notebar .btn{margin-left:auto;margin-bottom:6px}
 .hint{color:var(--muted);font-size:12.5px;margin-top:6px}
 .saved{color:var(--ok);font-size:13px}
 /* KI */
@@ -177,10 +187,11 @@ h2.sec .btn{margin-left:auto}
   .menu-toggle{display:inline-block}
   main{padding-block:16px 60px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
   .editor,.exams{grid-template-columns:minmax(0,1fr)}
+  .paper-wrap{padding:10px 8px}.paper{padding:22px 18px;font-size:15px}
   .qa{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}.qa .n{display:none}
   .clock div{min-width:56px}.clock b{font-size:22px}
 }
-@media print{aside,.head .btn,.tabs,.crumbs,.no-print{display:none!important}.app{display:block}main{overflow:visible}.editor{display:block}.editor textarea{display:none}.preview{border:0}}
+@media print{aside,.head .btn,.tabs,.crumbs,.no-print{display:none!important}.app{display:block}main{overflow:visible}.editor{display:block}.editor textarea{display:none}.preview{border:0}.paper-wrap{background:none;border:0;padding:0}.paper{box-shadow:none;padding:0;max-width:none}}
 </style>
 </head>
 <body>
@@ -600,11 +611,11 @@ function viewItem(){
     <div class="head no-print">${menuBtn}
       <input class="title-in" id="title" value="${esc(i.title)}" aria-label="Titel">
       <span class="saved" id="saved"></span>
-      ${i.type==='note' && !inClaude ? `<button class="btn small" onclick="window.print()">🖨 Drucken</button>` : ''}
       <button class="btn small danger" onclick="deleteItem()">Löschen</button>
     </div>`;
   if(i.type === 'note'){
-    return head + aiStatusBox() + `
+    const mode = route.mode || (i.content.trim() ? 'read' : 'edit');
+    const aibar = `
       <div class="aibar no-print">
         <span class="lbl">✨ KI</span>
         <button class="btn small ai" onclick="aiRewrite('improve')" ${ai.busy?'disabled':''}>Überarbeiten & ergänzen</button>
@@ -615,12 +626,25 @@ function viewItem(){
           <input id="askq" placeholder="Frage zum Lernzettel stellen, z. B. „Erklär mir die Ursachen einfacher“" ${ai.busy?'disabled':''}>
           <button class="btn small ai" onclick="aiAsk()" ${ai.busy?'disabled':''}>Fragen</button>
         </div>
-        ${answers[i.id] ? `<div class="answer" style="flex-basis:100%" id="answer">${md(answers[i.id])}</div>` : ''}
+        ${answers[i.id] ? `<div class="answer md" style="flex-basis:100%" id="answer">${md(answers[i.id])}</div>` : ''}
+      </div>`;
+    const bar = `<div class="notebar no-print">
+      <div class="tabs">
+        <button class="${mode==='read'?'on':''}" onclick="go({...route,mode:'read'})">📄 Ansicht</button>
+        <button class="${mode==='edit'?'on':''}" onclick="go({...route,mode:'edit'})">✏️ Bearbeiten</button>
       </div>
+      <button class="btn small" id="pdfbtn" onclick="notePdf()" ${!i.content.trim()?'disabled':''}>⬇ Als PDF speichern</button>
+    </div>`;
+    if(mode === 'read') return head + aiStatusBox() + bar + `
+      <div class="paper-wrap"><article class="paper" id="paper" style="--c:${s.color}">
+        ${paperMeta(s, f, i)}
+        <div class="md" id="pv">${md(i.content) || '<p style="color:#677087">Noch leer – wechsle zu „Bearbeiten“.</p>'}</div>
+      </article></div>` + aibar;
+    return head + aiStatusBox() + bar + aibar + `
       <div class="editor" style="--c:${s.color}">
         <div class="no-print"><textarea id="ta" ${busyHere?'readonly':''} placeholder="Schreibe hier deinen Lernzettel…">${esc(i.content)}</textarea>
           <div class="hint"># Überschrift · ## Unterpunkt · **fett** · *kursiv* · ==markiert== · - Liste · 1. Aufzählung · &gt; Merksatz · | Tabelle | … |</div></div>
-        <div class="preview" id="pv">${md(i.content)}</div>
+        <div class="preview md" id="pv">${md(i.content)}</div>
       </div>`;
   }
   const mode = route.mode || (filled(i).length ? 'learn' : 'edit');
@@ -759,7 +783,7 @@ async function newItem(type){
   const f = getF(getS(route.s), route.f);
   const title = await ask(type==='note' ? 'Neuer Lernzettel' : 'Neuer Kartensatz', '', 'Anlegen'); if(!title) return;
   const i = addItem(f, type, title);
-  go({view:'item', s:route.s, f:f.id, i:i.id, mode: type==='cards' ? 'edit' : undefined});
+  go({view:'item', s:route.s, f:f.id, i:i.id, mode:'edit'});
 }
 async function deleteItem(){
   const f = getF(getS(route.s), route.f), i = getI(f, route.i);
@@ -943,7 +967,7 @@ async function aiCreate(preselect){
   if(r.what === 'cards') return aiNewCards(s, f, topic, material || null, false, images);
 
   const i = addItem(f, 'note', topic, {content:''});
-  go({view:'item', s:s.id, f:f.id, i:i.id});
+  go({view:'item', s:s.id, f:f.id, i:i.id, mode:'read'});
   const msg = copy ? 'Die KI überträgt deine Dateien in einen Lernzettel…' : 'Die KI schreibt deinen Lernzettel…';
   const signal = ai.start(msg, i.id);
   try{
@@ -1030,6 +1054,42 @@ async function aiAsk(){
     answers[i.id] = text;
   } catch(e){ answers[i.id] = (e.text ? e.text + '\n\n' : '') + aiErr(e); }
   ai.end(); const box = $('#askq'); if(box) box.value = '';
+}
+
+/* =========================================================
+   Lernzettel als PDF
+   ========================================================= */
+const HTML2PDF = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+function paperMeta(s, f, i){
+  return `<div class="paper-meta"><span>${esc(kindLabel(s)+s.name)} · ${esc(f.name)}</span><span>Stand: ${fmtDate(i.updated)}</span></div>`;
+}
+async function notePdf(){
+  const s = getS(route.s), f = getF(s, route.f), i = curItem();
+  if(!i?.content.trim()) return;
+  const btn = $('#pdfbtn'); if(btn){ btn.disabled = true; btn.textContent = 'PDF wird erstellt…'; }
+  try{
+    await loadScript(HTML2PDF);
+    const el = document.createElement('article');
+    el.className = 'paper pdfmode'; el.style.setProperty('--c', s.color);
+    el.innerHTML = paperMeta(s, f, i) + `<div class="md">${md(i.content)}</div>`;
+    const filename = (i.title.replace(/[\\/:*?"<>|]+/g, ' ').trim() || 'Lernzettel') + '.pdf';
+    const blob = await window.html2pdf().set({
+      margin:[14, 14, 16, 14], filename,
+      image:{type:'jpeg', quality:.95},
+      html2canvas:{scale:2, backgroundColor:'#ffffff', useCORS:true},
+      jsPDF:{unit:'mm', format:'a4', orientation:'portrait'},
+      pagebreak:{mode:['css','legacy'], avoid:['h1','h2','h3','.merke','tr','li','p']}
+    }).from(el).outputPdf('blob');
+    if(inClaude){
+      if(!downloads) throw {code:'unavailable'};
+      const r = await downloads.save({filename, data:blob});
+      if(r?.status === 'saved') toast('PDF gespeichert ✓');
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast('PDF gespeichert ✓');
+    }
+  } catch(e){ if(e?.code !== 'cancelled') toast('Das PDF konnte nicht erstellt werden. Versuch es nochmal.', 6000); }
+  finally{ const b = $('#pdfbtn'); if(b){ b.disabled = false; b.textContent = '⬇ Als PDF speichern'; } }
 }
 
 /* =========================================================
@@ -1204,7 +1264,7 @@ function fileToNote(id){
   const s = getS(route.s), f = getF(s, route.f), x = curFile(id); if(!x?.text) return;
   const title = x.name.replace(/\.[^.]+$/, '');
   const i = addItem(f, 'note', title, {content:`# ${title}\n\n${x.text}`});
-  go({view:'item', s:s.id, f:f.id, i:i.id}); toast('Als Lernzettel übernommen – mit „✨ Überarbeiten“ kannst du ihn ordnen lassen.', 5000);
+  go({view:'item', s:s.id, f:f.id, i:i.id, mode:'read'}); toast('Als Lernzettel übernommen – mit „✨ Überarbeiten“ kannst du ihn ordnen lassen.', 5000);
 }
 async function ocrFile(id){
   if(!aiReady()) return;
