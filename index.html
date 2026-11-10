@@ -2,87 +2,138 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lernmappe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
+/* Layout: feste Seitenleiste mit Fächern, rechts der Arbeitsbereich (Fach → Mappe → Eintrag) */
 :root{
-  --bg:#f5f6f8;--panel:#ffffff;--panel2:#f0f2f5;--text:#1d2330;--muted:#6b7385;--line:#e2e5eb;
-  --accent:#3b6fe0;--danger:#d64545;--ok:#2f9e5b;--warn:#e0a020;--shadow:0 1px 3px rgba(0,0,0,.07);
+  --bg:#f4f5f8;--panel:#ffffff;--panel2:#eef0f5;--text:#1b2130;--muted:#677087;--line:#dfe3ec;
+  --accent:#3b63d9;--accent-soft:#e6ecfc;--danger:#cf3f3f;--ok:#278a52;--warn:#d98b12;--ai:#7a4fd6;--ai-soft:#f0eafd;
+  --mark:#ffe46b;--shadow:0 1px 3px rgba(20,30,60,.07);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#14171d;--panel:#1c2028;--panel2:#242934;--text:#e6e9ef;--muted:#9099ab;--line:#2e3440;--shadow:none;
+    --bg:#13161c;--panel:#1b1f27;--panel2:#252a35;--text:#e5e8ef;--muted:#949cb0;--line:#2f3542;
+    --accent:#6f91f0;--accent-soft:#232c45;--danger:#ef6b6b;--ok:#4cc27e;--warn:#f0a83a;--ai:#a988f2;--ai-soft:#2a2340;
+    --mark:#b89a1c;--shadow:none;color-scheme:dark;
   }
 }
-:root[data-theme="dark"]{--bg:#14171d;--panel:#1c2028;--panel2:#242934;--text:#e6e9ef;--muted:#9099ab;--line:#2e3440;--shadow:none}
+:root[data-theme="dark"]{
+  --bg:#13161c;--panel:#1b1f27;--panel2:#252a35;--text:#e5e8ef;--muted:#949cb0;--line:#2f3542;
+  --accent:#6f91f0;--accent-soft:#232c45;--danger:#ef6b6b;--ok:#4cc27e;--warn:#f0a83a;--ai:#a988f2;--ai-soft:#2a2340;
+  --mark:#b89a1c;--shadow:none;color-scheme:dark;
+}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
-.app{display:grid;grid-template-columns:250px 1fr;height:100vh}
-/* Sidebar */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:250px 1fr;height:100%}
+/* Seitenleiste */
 aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:auto}
-.brand{padding:18px 18px 10px;font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px;cursor:pointer}
-.brand span{font-size:20px}
+.brand{padding:18px 18px 10px;font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px;cursor:pointer;border:0;background:none;text-align:left}
 .search{margin:6px 14px 10px}
 .search input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
 .navlabel{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:10px 18px 4px}
 .nav button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:8px 18px;text-align:left}
 .nav button:hover{background:var(--panel2)}
 .nav button.active{background:var(--panel2);font-weight:600}
-.dot{width:10px;height:10px;border-radius:3px;flex:none}
-.tag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--panel2);color:var(--muted);margin-left:auto;border:1px solid var(--line)}
-.sidefoot{margin-top:auto;padding:12px 14px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line)}
-/* Main */
-main{overflow:auto;padding:24px 32px 60px}
+.nav .cd-mini{margin-left:auto;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dot{width:10px;height:10px;border-radius:3px;flex:none;display:inline-block}
+.tag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.nav .tag{margin-left:auto}.nav .cd-mini + .tag{margin-left:6px}
+.sidefoot{margin-top:auto;padding:12px 14px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line);align-items:center}
+.sync{font-size:12px;color:var(--muted);width:100%}
+/* Hauptbereich */
+main{overflow:auto;padding-block:24px 60px;padding-left:max(32px, env(safe-area-inset-left, 0px));padding-right:max(32px, env(safe-area-inset-right, 0px));min-width:0}
 .crumbs{color:var(--muted);font-size:13px;margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap}
 .crumbs a{color:var(--muted);cursor:pointer;text-decoration:none}
 .crumbs a:hover{color:var(--accent)}
-.head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-.head h1{font-size:24px;margin:0;flex:1;min-width:200px}
-.btn{border:1px solid var(--line);background:var(--panel);padding:7px 12px;border-radius:8px;box-shadow:var(--shadow)}
+.head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.head h1{font-size:24px;margin:0;flex:1;min-width:180px;text-wrap:balance}
+h2.sec{font-size:17px;margin:32px 0 12px;display:flex;align-items:center;gap:10px}
+h2.sec .btn{margin-left:auto}
+.btn{border:1px solid var(--line);background:var(--panel);padding:7px 12px;border-radius:8px;box-shadow:var(--shadow);white-space:nowrap}
 .btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ai{background:var(--ai-soft);border-color:var(--ai);color:var(--ai);font-weight:600}
+.btn.ai:hover{background:var(--ai);color:#fff}
 .btn.danger{color:var(--danger)}
 .btn.small{padding:4px 9px;font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;box-shadow:var(--shadow);position:relative;transition:transform .08s}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;box-shadow:var(--shadow);position:relative;transition:transform .08s;min-width:0}
 .card:hover{transform:translateY(-2px);border-color:var(--c,var(--accent))}
 .card .bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:var(--c,var(--accent))}
-.card h3{margin:0 0 4px;font-size:16px}
+.card h3{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .card .meta{color:var(--muted);font-size:13px}
+.card .examline{margin-top:8px;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
 .folder-ic{font-size:26px;line-height:1;margin-bottom:8px}
 .list{display:flex;flex-direction:column;gap:8px}
-.row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;cursor:pointer}
+.row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;cursor:pointer;min-width:0}
 .row:hover{border-color:var(--accent)}
 .row .ic{font-size:20px}
 .row .t{flex:1;min-width:0}
 .row .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .t small{color:var(--muted)}
 .empty{color:var(--muted);text-align:center;padding:40px 20px;border:2px dashed var(--line);border-radius:12px}
-.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .tabs button{border:0;background:none;padding:8px 14px;border-bottom:2px solid transparent;color:var(--muted)}
 .tabs button.on{color:var(--text);border-color:var(--accent);font-weight:600}
+/* Prüfungs-Countdown */
+.exams{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
+.next{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);cursor:pointer;min-width:0}
+.next .lbl{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.next .subj{font-size:21px;font-weight:700;margin:2px 0 2px}
+.next .when{color:var(--muted);font-size:13.5px}
+.clock{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.clock div{background:var(--panel2);border-radius:10px;padding:8px 10px;min-width:64px;text-align:center}
+.clock b{display:block;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.clock span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.urg-hi{color:var(--danger)}.urg-mid{color:var(--warn)}.urg-lo{color:var(--ok)}
+.exlist{display:flex;flex-direction:column;gap:8px;min-width:0}
+.exrow{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;min-width:0}
+.exrow .nm{flex:1;min-width:0}
+.exrow .nm small{display:block;color:var(--muted);font-size:12.5px}
+.exrow .left{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.exrow.past{opacity:.55}
+.banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-variant-numeric:tabular-nums}
+.examtable{display:flex;flex-direction:column;gap:8px}
+.examtable .exrow{cursor:default}
 /* Editor */
-.title-in{font-size:22px;font-weight:700;border:0;background:none;width:100%;padding:4px 0;outline:none}
-.editor{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.title-in{font-size:22px;font-weight:700;border:0;background:none;padding:4px 0;outline:none;flex:1;min-width:160px}
+.editor{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .editor textarea{width:100%;min-height:60vh;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:14px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
-.preview{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;min-height:60vh;overflow:auto}
+.editor textarea[readonly]{opacity:.8}
+.preview{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;min-height:60vh;overflow:auto;min-width:0}
 .preview h1,.preview h2,.preview h3{margin:.8em 0 .3em}
 .preview h1{font-size:22px;border-bottom:2px solid var(--c,var(--accent));padding-bottom:4px}
 .preview h2{font-size:18px;color:var(--c,var(--accent))}
 .preview h3{font-size:16px}
-.preview mark{background:#ffe86b;color:#222;padding:0 2px;border-radius:3px}
+.preview mark,.answer mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
 .preview code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:13px}
-.preview .merke{border-left:4px solid var(--warn);background:var(--panel2);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0}
-.preview .merke::before{content:"💡 Merke: ";font-weight:700}
-.preview table{border-collapse:collapse;margin:8px 0}
-.preview td,.preview th{border:1px solid var(--line);padding:4px 10px}
+.merke{border-left:4px solid var(--warn);background:var(--panel2);padding:8px 12px;border-radius:0 8px 8px 0;margin:8px 0}
+.merke::before{content:"💡 Merke: ";font-weight:700}
+.tbl{overflow-x:auto}
+.preview table,.answer table{border-collapse:collapse;margin:8px 0}
+.preview td,.preview th,.answer td,.answer th{border:1px solid var(--line);padding:4px 10px;text-align:left;vertical-align:top}
+.preview th,.answer th{background:var(--panel2)}
 .hint{color:var(--muted);font-size:12.5px;margin-top:6px}
 .saved{color:var(--ok);font-size:13px}
-/* Flashcards */
-.qa{display:grid;grid-template-columns:28px 1fr 1fr 34px;gap:8px;align-items:start;margin-bottom:8px}
+/* KI */
+.aibar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--ai-soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:14px}
+.aibar .lbl{font-weight:700;color:var(--ai);font-size:13.5px;margin-right:4px}
+.aistatus{display:flex;gap:10px;align-items:center;background:var(--ai-soft);color:var(--ai);border:1px solid var(--ai);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-weight:600}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}.card{transition:none}}
+.askbox{display:flex;gap:8px;margin-top:10px}
+.askbox input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.answer{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin-top:10px}
+/* Karteikarten */
+.qa{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) 34px;gap:8px;align-items:start;margin-bottom:8px}
 .qa textarea{width:100%;min-height:54px;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:8px;resize:vertical}
 .qa .n{color:var(--muted);padding-top:8px;text-align:right}
 .learn{max-width:640px;margin:0 auto;text-align:center}
@@ -90,23 +141,29 @@ main{overflow:auto;padding:24px 32px 60px}
 .flip small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
 .progress{height:6px;background:var(--panel2);border-radius:3px;margin:14px 0;overflow:hidden}
 .progress div{height:100%;background:var(--c,var(--accent))}
-.learn .actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
-.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:var(--panel2);color:var(--muted);margin-left:6px}
-/* Modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:10;padding:16px}
-.modal{background:var(--panel);border-radius:12px;padding:20px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.learn .actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:var(--panel2);color:var(--muted)}
+/* Dialoge & Hinweise */
+.modal-bg{position:fixed;inset:0;background:rgba(10,15,30,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal{background:var(--panel);border-radius:12px;padding:20px;width:100%;max-width:460px;box-shadow:0 10px 40px rgba(0,0,0,.25);max-height:90vh;overflow:auto}
 .modal h3{margin:0 0 12px}
-.modal input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);margin-bottom:14px}
-.modal .acts{display:flex;justify-content:flex-end;gap:8px}
+.modal p{margin:0 0 14px;color:var(--muted)}
+.modal label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.modal input,.modal select,.modal textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);margin-bottom:14px}
+.modal textarea{min-height:110px;resize:vertical}
+.modal .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:30;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
 .menu-toggle{display:none}
-@media (max-width:820px){
+@media (max-width:860px){
   .app{grid-template-columns:1fr}
-  aside{position:fixed;inset:0 30% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s}
+  aside{position:fixed;inset:0 25% 0 0;z-index:15;transform:translateX(-100%);transition:transform .2s;padding-top:env(safe-area-inset-top, 0px)}
   aside.open{transform:none}
   .menu-toggle{display:inline-block}
-  main{padding:16px}
-  .editor{grid-template-columns:1fr}
-  .qa{grid-template-columns:1fr 34px}.qa .n{display:none}
+  main{padding-block:16px 60px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .editor,.exams{grid-template-columns:minmax(0,1fr)}
+  .qa{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px}.qa .n{display:none}
+  .clock div{min-width:56px}.clock b{font-size:22px}
 }
 @media print{aside,.head .btn,.tabs,.crumbs,.no-print{display:none!important}.app{display:block}main{overflow:visible}.editor{display:block}.editor textarea{display:none}.preview{border:0}}
 </style>
@@ -118,33 +175,107 @@ main{overflow:auto;padding:24px 32px 60px}
 </div>
 <input type="file" id="importFile" accept=".json" hidden>
 <script>
-/* ---------- Daten ---------- */
+/* =========================================================
+   Daten
+   ========================================================= */
 const KEY = 'lernmappe-v1';
 const DEFAULT_SUBJECTS = [
   {name:'Geschichte', kind:'LK', color:'#b5651d', icon:'🏛️'},
   {name:'Politik',    kind:'LK', color:'#3b6fe0', icon:'⚖️'},
   {name:'Englisch',   kind:'LK', color:'#c0392b', icon:'🇬🇧'},
   {name:'Mathe',      kind:'P4', color:'#8e44ad', icon:'📐'},
-  {name:'Deutsch',    kind:'P5', color:'#d4a017', icon:'📖'},
+  {name:'Deutsch',    kind:'P5', color:'#c99a12', icon:'📖'},
   {name:'Biologie',   kind:'',   color:'#2f9e5b', icon:'🧬'},
   {name:'Sport',      kind:'',   color:'#e67e22', icon:'🏃'},
   {name:'Kunst',      kind:'',   color:'#d63384', icon:'🎨'},
 ];
+const DEFAULT_EXAMS = [
+  ['Englisch',   '2026-11-11T08:00'],
+  ['Geschichte', '2026-11-16T08:00'],
+  ['Politik',    '2026-11-20T08:00'],
+  ['Mathe',      '2026-11-24T08:00'],
+];
 const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
 
-function freshState(){
-  return {subjects: DEFAULT_SUBJECTS.map(s => ({id:uid(), ...s, folders:[]}))};
+function migrate(st){
+  if(!st || !Array.isArray(st.subjects)) st = {subjects: DEFAULT_SUBJECTS.map(s => ({id:uid(), ...s, folders:[]}))};
+  if(!Array.isArray(st.exams)){
+    st.exams = DEFAULT_EXAMS.map(([name, at]) => {
+      const s = st.subjects.find(x => x.name === name);
+      return s ? {id:uid(), subjectId:s.id, at, note:'Klausur'} : null;
+    }).filter(Boolean);
+  }
+  return st;
 }
 let state;
-try { state = JSON.parse(localStorage.getItem(KEY)) || freshState(); } catch(e){ state = freshState(); }
-let storageOK = true;
-function save(){
+try { state = JSON.parse(localStorage.getItem(KEY)); } catch(e){ state = null; }
+state = migrate(state);
+
+let localWarned = false;
+function saveLocal(){
   try { localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch(e){ if(storageOK){ storageOK=false; alert('Speichern im Browser nicht möglich. Bitte regelmäßig über „Export“ sichern.'); } }
+  catch(e){ if(!localWarned && !cloud.on){ localWarned = true; toast('Speichern im Browser nicht möglich – bitte über „Export“ sichern.'); } }
+}
+function save(){ state.savedAt = Date.now(); saveLocal(); cloud.queue(); }
+
+/* ---------- Cloud-Speicher (nur in der Claude-Version) ----------
+   Speichert den ganzen Stand privat pro Person, aufgeteilt in Stücke,
+   damit auch große Lernzettel-Sammlungen Platz haben. */
+const cloud = {
+  on:false, col:null, sent:[], busy:false, again:false, timer:null, status:'',
+  async init(){
+    if(!window.claude?.use) return;
+    const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    if(!db || !user) { this.setStatus(''); return; }
+    try{
+      const id = await user.id(); if(!id) return;
+      this.col = db.collection('data/users/' + id);
+      this.setStatus('Verbinde…');
+      const meta = await withTimeout(this.col.doc('meta').get(), 10000);
+      if(meta.exists){
+        const m = meta.data();
+        const parts = await withTimeout(Promise.all(Array.from({length:m.n}, (_,k) => this.col.doc('c'+k).get())), 15000);
+        this.sent = parts.map(p => p.data()?.s ?? '');
+        const remote = migrate(JSON.parse(this.sent.join('')));
+        this.on = true;
+        if((remote.savedAt||0) >= (state.savedAt||0)){ state = remote; saveLocal(); render(); }
+        else this.push();
+      } else { this.on = true; this.push(); }
+      this.setStatus('☁️ Gespeichert in deinem Claude-Konto');
+    } catch(e){ this.on = false; this.setStatus('⚠️ Cloud nicht erreichbar – nur lokal gespeichert'); }
+  },
+  queue(){ if(!this.on) return; clearTimeout(this.timer); this.setStatus('☁️ Speichert…'); this.timer = setTimeout(() => this.push(), 1500); },
+  async push(){
+    if(!this.col) return;
+    if(this.busy){ this.again = true; return; }
+    this.busy = true;
+    try{
+      const json = JSON.stringify(state), SIZE = 60000, parts = [];
+      for(let k = 0; k < json.length; k += SIZE) parts.push(json.slice(k, k + SIZE));
+      for(let k = 0; k < parts.length; k++) if(parts[k] !== this.sent[k]) await this.col.doc('c'+k).set({s:parts[k]});
+      await this.col.doc('meta').set({n:parts.length, savedAt:state.savedAt||Date.now()});
+      for(let k = parts.length; k < this.sent.length; k++) await this.col.doc('c'+k).delete();
+      this.sent = parts;
+      this.setStatus('☁️ Gespeichert in deinem Claude-Konto');
+    } catch(e){ this.setStatus('⚠️ Cloud-Speichern fehlgeschlagen – lokal gesichert'); }
+    finally{ this.busy = false; if(this.again){ this.again = false; this.push(); } }
+  },
+  setStatus(t){ this.status = t; const el = document.getElementById('sync'); if(el) el.textContent = t || '💾 Lokal im Browser gespeichert'; }
+};
+function withTimeout(p, ms){ return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]); }
+
+/* ---------- KI (nur in der Claude-Version verfügbar) ---------- */
+let sample = null, downloads = null;
+const inClaude = !!window.claude?.use;
+if(inClaude){
+  window.claude.use('sample').then(s => { sample = s; render(); });
+  window.claude.use('downloads').then(d => { downloads = d; });
 }
 
-/* ---------- Navigation ---------- */
-let route = {view:'home'};       // {view, s, f, i, mode}
+/* =========================================================
+   Hilfsfunktionen
+   ========================================================= */
+let route = {view:'home'};
 let query = '';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -152,8 +283,12 @@ const getS = id => state.subjects.find(s => s.id === id);
 const getF = (s,id) => s?.folders.find(f => f.id === id);
 const getI = (f,id) => f?.items.find(i => i.id === id);
 const fmtDate = t => new Date(t).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+const fmtExam = at => new Date(at).toLocaleString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) + ' Uhr';
 const kindLabel = s => s.kind ? s.kind + ' ' : '';
+const filled = i => i.cards.filter(c => (c.q||'').trim() || (c.a||'').trim());
+const countItems = s => s.folders.reduce((n,f) => n + f.items.length, 0);
 function go(r){ route = r; $('#side').classList.remove('open'); render(); $('#main').scrollTop = 0; }
+function curItem(){ const s = getS(route.s), f = getF(s, route.f); return getI(f, route.i); }
 
 /* ---------- Markdown-Light ---------- */
 function inline(t){
@@ -166,76 +301,181 @@ function inline(t){
 }
 function md(src){
   const lines = esc(src).split('\n'); let out = '', list = null, table = null;
-  const close = () => { if(list){ out += `</${list}>`; list = null; } if(table){ out += '</table>'; table = null; } };
+  const closeList = () => { if(list){ out += `</${list}>`; list = null; } };
+  const closeTable = () => { if(table){ out += '</table></div>'; table = null; } };
   for(const raw of lines){
-    const l = raw.trimEnd();
-    let m;
-    if(/^\|.*\|$/.test(l)){
-      if(/^\|[\s\-:|]+\|$/.test(l)) continue;
-      if(list){ out += `</${list}>`; list=null; }
-      const cells = l.slice(1,-1).split('|').map(c => inline(c.trim()));
-      if(!table){ table = true; out += '<table><tr>' + cells.map(c=>`<th>${c}</th>`).join('') + '</tr>'; }
+    const l = raw.trimEnd(); let m;
+    if(/^\s*\|.*\|$/.test(l)){
+      if(/^\s*\|[\s\-:|]+\|$/.test(l)) continue;
+      closeList();
+      const cells = l.trim().slice(1,-1).split('|').map(c => inline(c.trim()));
+      if(!table){ table = true; out += '<div class="tbl"><table><tr>' + cells.map(c=>`<th>${c}</th>`).join('') + '</tr>'; }
       else out += '<tr>' + cells.map(c=>`<td>${c}</td>`).join('') + '</tr>';
       continue;
     }
-    if(table){ out += '</table>'; table = null; }
-    if((m = l.match(/^(#{1,3})\s+(.*)/))){ close(); out += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; }
-    else if((m = l.match(/^&gt;\s?(.*)/))){ close(); out += `<div class="merke">${inline(m[1])}</div>`; }
-    else if((m = l.match(/^\s*[-*]\s+(.*)/))){ if(list!=='ul'){ close(); out += '<ul>'; list='ul'; } out += `<li>${inline(m[1])}</li>`; }
-    else if((m = l.match(/^\s*\d+[.)]\s+(.*)/))){ if(list!=='ol'){ close(); out += '<ol>'; list='ol'; } out += `<li>${inline(m[1])}</li>`; }
-    else if(l === '---'){ close(); out += '<hr>'; }
-    else if(l === ''){ close(); }
-    else { close(); out += `<p>${inline(l)}</p>`; }
+    closeTable();
+    if((m = l.match(/^(#{1,3})\s+(.*)/))){ closeList(); out += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; }
+    else if((m = l.match(/^&gt;\s?(.*)/))){ closeList(); out += `<div class="merke">${inline(m[1])}</div>`; }
+    else if((m = l.match(/^\s*[-*•]\s+(.*)/))){ if(list!=='ul'){ closeList(); out += '<ul>'; list='ul'; } out += `<li>${inline(m[1])}</li>`; }
+    else if((m = l.match(/^\s*\d+[.)]\s+(.*)/))){ if(list!=='ol'){ closeList(); out += '<ol>'; list='ol'; } out += `<li>${inline(m[1])}</li>`; }
+    else if(l === '---'){ closeList(); out += '<hr>'; }
+    else if(l === ''){ closeList(); }
+    else { closeList(); out += `<p>${inline(l)}</p>`; }
   }
-  close();
+  closeList(); closeTable();
   return out;
 }
 
-/* ---------- Modal ---------- */
-function ask(title, value='', okText='Speichern'){
+/* ---------- Dialoge & Hinweise (statt alert/confirm) ---------- */
+function toast(text, ms = 3500){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = text;
+  document.body.appendChild(t); setTimeout(() => t.remove(), ms);
+}
+function modal(title, body, okText = 'Speichern', {danger = false, wide = false} = {}){
   return new Promise(res => {
     const bg = document.createElement('div'); bg.className = 'modal-bg';
-    bg.innerHTML = `<div class="modal"><h3>${esc(title)}</h3><input value="${esc(value)}"><div class="acts"><button class="btn" data-x>Abbrechen</button><button class="btn primary" data-ok>${esc(okText)}</button></div></div>`;
+    bg.innerHTML = `<form class="modal" ${wide?'style="max-width:560px"':''}><h3>${esc(title)}</h3>${body}
+      <div class="acts"><button type="button" class="btn" data-x>Abbrechen</button>
+      <button type="submit" class="btn ${danger?'danger':'primary'}">${esc(okText)}</button></div></form>`;
     document.body.appendChild(bg);
-    const inp = bg.querySelector('input'); inp.focus(); inp.select();
+    const form = bg.querySelector('form');
+    const first = form.querySelector('input,select,textarea'); (first || form.querySelector('[type=submit]')).focus();
+    if(first?.select && first.tagName === 'INPUT') first.select();
     const done = v => { bg.remove(); res(v); };
-    bg.querySelector('[data-ok]').onclick = () => done(inp.value.trim() || null);
+    form.onsubmit = e => { e.preventDefault(); done(Object.fromEntries(new FormData(form))); };
     bg.querySelector('[data-x]').onclick = () => done(null);
     bg.onclick = e => { if(e.target === bg) done(null); };
-    inp.onkeydown = e => { if(e.key==='Enter') done(inp.value.trim() || null); if(e.key==='Escape') done(null); };
+    form.onkeydown = e => { if(e.key === 'Escape') done(null); };
   });
 }
+async function ask(title, value = '', okText = 'Speichern'){
+  const r = await modal(title, `<input name="v" id="m-v" value="${esc(value)}" required>`, okText);
+  return r?.v?.trim() || null;
+}
+async function confirmBox(text, okText = 'Löschen'){
+  return !!(await modal('Bist du sicher?', `<p>${esc(text)}</p>`, okText, {danger:true}));
+}
 
-/* ---------- Sidebar ---------- */
+/* =========================================================
+   Prüfungs-Countdown
+   ========================================================= */
+function examsSorted(){
+  return [...state.exams].sort((a,b) => new Date(a.at) - new Date(b.at));
+}
+function upcoming(){ const now = Date.now(); return examsSorted().filter(e => new Date(e.at) > now); }
+function nextExamFor(sid){ return upcoming().find(e => e.subjectId === sid); }
+function parts(ms){
+  const s = Math.max(0, Math.floor(ms/1000));
+  return {d: Math.floor(s/86400), h: Math.floor(s%86400/3600), m: Math.floor(s%3600/60), s: s%60};
+}
+function urg(ms){ return ms < 3*864e5 ? 'urg-hi' : ms < 7*864e5 ? 'urg-mid' : 'urg-lo'; }
+function shortLeft(ms){
+  if(ms <= 0) return 'vorbei';
+  const p = parts(ms), pad = n => String(n).padStart(2,'0');
+  if(p.d >= 2) return `${p.d} Tage ${p.h} Std`;
+  if(p.d === 1) return `1 Tag ${p.h} Std`;
+  return `${pad(p.h)}:${pad(p.m)}:${pad(p.s)}`;
+}
+function tick(){
+  const now = Date.now();
+  document.querySelectorAll('[data-cd]').forEach(el => {
+    const ms = new Date(el.dataset.cd) - now;
+    if(el.dataset.mode === 'clock'){
+      const p = parts(ms);
+      el.innerHTML = [['Tage',p.d],['Std',p.h],['Min',p.m],['Sek',p.s]].map(([l,v]) => `<div><b>${String(v).padStart(2,'0')}</b><span>${l}</span></div>`).join('');
+    } else {
+      el.textContent = shortLeft(ms);
+      el.classList.remove('urg-hi','urg-mid','urg-lo'); if(ms > 0) el.classList.add(urg(ms));
+    }
+  });
+}
+setInterval(tick, 1000);
+
+function countdownBlock(){
+  const up = upcoming();
+  if(!up.length) return `<div class="empty">Keine anstehenden Prüfungen. <a href="#" onclick="go({view:'exams'});return false">Prüfung eintragen</a></div>`;
+  const n = up[0], s = getS(n.subjectId) || {name:'?', color:'var(--accent)'};
+  const rest = up.slice(1);
+  return `<div class="exams">
+    <div class="next" style="--c:${s.color}" onclick="go({view:'subject',s:'${s.id}'})">
+      <div class="lbl">Nächste Prüfung</div>
+      <div class="subj">${esc(kindLabel(s)+s.name)} ${n.note?`<span class="badge">${esc(n.note)}</span>`:''}</div>
+      <div class="when">${fmtExam(n.at)}</div>
+      <div class="clock" data-cd="${n.at}" data-mode="clock"></div>
+    </div>
+    <div class="exlist">${rest.length ? rest.map(e => examRow(e)).join('') : `<div class="empty" style="padding:20px">Danach keine weiteren Prüfungen eingetragen.</div>`}</div>
+  </div>`;
+}
+function examRow(e, manage){
+  const s = getS(e.subjectId) || {name:'(Fach gelöscht)', color:'#888', kind:''};
+  const past = new Date(e.at) <= Date.now();
+  return `<div class="exrow ${past?'past':''}" ${manage?'':`onclick="go({view:'subject',s:'${s.id}'})"`}>
+    <span class="dot" style="background:${s.color}"></span>
+    <div class="nm"><b>${esc(kindLabel(s)+s.name)}</b><small>${fmtExam(e.at)}${e.note?' · '+esc(e.note):''}</small></div>
+    <span class="left" data-cd="${e.at}">${shortLeft(new Date(e.at) - Date.now())}</span>
+    ${manage?`<button class="btn small" onclick="editExam('${e.id}')">Ändern</button><button class="btn small danger" onclick="deleteExam('${e.id}')" aria-label="Prüfung löschen">✕</button>`:''}
+  </div>`;
+}
+function viewExams(){
+  const all = examsSorted();
+  return `${crumbs([['Fächer',{view:'home'}],['Prüfungen']])}
+    <div class="head">${menuBtn}<h1>⏳ Prüfungen</h1><button class="btn primary" onclick="editExam()">＋ Prüfung eintragen</button></div>
+    ${all.length ? `<div class="examtable">${all.map(e => examRow(e, true)).join('')}</div>` : `<div class="empty">Noch keine Prüfungen eingetragen.</div>`}`;
+}
+async function editExam(id){
+  const e = id ? state.exams.find(x => x.id === id) : null;
+  const r = await modal(e ? 'Prüfung ändern' : 'Prüfung eintragen', `
+    <label for="ex-s">Fach</label>
+    <select name="s" id="ex-s">${state.subjects.map(s => `<option value="${s.id}" ${e?.subjectId===s.id?'selected':''}>${esc(kindLabel(s)+s.name)}</option>`).join('')}</select>
+    <div class="two"><div><label for="ex-d">Datum</label><input type="date" name="d" id="ex-d" required value="${e?e.at.slice(0,10):''}"></div>
+    <div><label for="ex-t">Uhrzeit</label><input type="time" name="t" id="ex-t" required value="${e?e.at.slice(11,16):'08:00'}"></div></div>
+    <label for="ex-n">Notiz (optional)</label><input name="n" id="ex-n" placeholder="z. B. Klausur Q2.1, mündliche Prüfung" value="${esc(e?.note||'Klausur')}">`);
+  if(!r) return;
+  const at = `${r.d}T${r.t}`;
+  if(e) Object.assign(e, {subjectId:r.s, at, note:r.n.trim()});
+  else state.exams.push({id:uid(), subjectId:r.s, at, note:r.n.trim()});
+  save(); render(); toast('Prüfung gespeichert');
+}
+async function deleteExam(id){
+  if(!await confirmBox('Diese Prüfung aus dem Countdown entfernen?', 'Entfernen')) return;
+  state.exams = state.exams.filter(x => x.id !== id); save(); render();
+}
+
+/* =========================================================
+   Seitenleiste
+   ========================================================= */
 function renderSide(){
   const cur = route.s;
   $('#side').innerHTML = `
-    <div class="brand" onclick="go({view:'home'})"><span>📚</span> Lernmappe</div>
-    <div class="search"><input id="q" placeholder="🔍 Alles durchsuchen…" value="${esc(query)}"></div>
+    <button class="brand" onclick="go({view:'home'})"><span aria-hidden="true">📚</span> Lernmappe</button>
+    <div class="search"><input id="q" placeholder="🔍 Alles durchsuchen…" value="${esc(query)}" aria-label="Suchen"></div>
+    <div class="nav"><button class="${route.view==='exams'?'active':''}" onclick="go({view:'exams'})">⏳ Prüfungen</button></div>
     <div class="navlabel">Fächer</div>
     <div class="nav">
-      ${state.subjects.map(s => `
+      ${state.subjects.map(s => { const ne = nextExamFor(s.id); return `
         <button class="${s.id===cur?'active':''}" onclick="go({view:'subject',s:'${s.id}'})">
           <span class="dot" style="background:${s.color}"></span>${esc(s.name)}
+          ${ne?`<span class="cd-mini" title="Nächste Prüfung">${Math.max(0, Math.ceil((new Date(ne.at)-Date.now())/864e5))} T</span>`:''}
           ${s.kind?`<span class="tag">${s.kind}</span>`:''}
-        </button>`).join('')}
+        </button>`; }).join('')}
     </div>
     <div class="sidefoot">
       <button class="btn small" onclick="exportData()" title="Alle Daten als Datei sichern">⬇ Export</button>
       <button class="btn small" onclick="$('#importFile').click()" title="Gesicherte Datei laden">⬆ Import</button>
-      <button class="btn small" onclick="toggleTheme()" title="Hell/Dunkel">🌓</button>
+      <button class="btn small" onclick="toggleTheme()" title="Hell/Dunkel" aria-label="Hell- oder Dunkelmodus">🌓</button>
+      <div class="sync" id="sync">${esc(cloud.status || '💾 Lokal im Browser gespeichert')}</div>
     </div>`;
   const q = $('#q');
-  q.oninput = () => { query = q.value; if(query.trim()) go({view:'search'}); else go({view:'home'}); setTimeout(()=>{ const n=$('#q'); n.focus(); n.setSelectionRange(n.value.length,n.value.length); }); };
+  q.oninput = () => { query = q.value; go(query.trim() ? {view:'search'} : {view:'home'}); const n = $('#q'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
 }
 
-/* ---------- Ansichten ---------- */
-function crumbs(parts){
-  return `<div class="crumbs">${parts.map(([t,r]) => r ? `<a onclick='go(${JSON.stringify(r)})'>${esc(t)}</a>` : `<span>${esc(t)}</span>`).join('<span>›</span>')}</div>`;
+/* =========================================================
+   Ansichten
+   ========================================================= */
+function crumbs(list){
+  return `<div class="crumbs">${list.map(([t,r]) => r ? `<a onclick='go(${JSON.stringify(r)})'>${esc(t)}</a>` : `<span>${esc(t)}</span>`).join('<span>›</span>')}</div>`;
 }
-const menuBtn = `<button class="btn menu-toggle" onclick="$('#side').classList.toggle('open')">☰</button>`;
-const filled = i => i.cards.filter(c => (c.q||'').trim() || (c.a||'').trim());
-const countItems = s => s.folders.reduce((n,f) => n + f.items.length, 0);
+const menuBtn = `<button class="btn menu-toggle" onclick="$('#side').classList.toggle('open')" aria-label="Menü">☰</button>`;
 
 function viewHome(){
   const recent = [];
@@ -243,18 +483,21 @@ function viewHome(){
   recent.sort((a,b) => b.i.updated - a.i.updated);
   return `
     <div class="head">${menuBtn}<h1>Meine Fächer</h1></div>
+    ${countdownBlock()}
+    <h2 class="sec">Fächer</h2>
     <div class="grid">
-      ${state.subjects.map(s => `
+      ${state.subjects.map(s => { const ne = nextExamFor(s.id); return `
         <div class="card" style="--c:${s.color}" onclick="go({view:'subject',s:'${s.id}'})">
           <div class="bar"></div>
           <div class="folder-ic">${s.icon||'📁'}</div>
           <h3>${esc(s.name)} ${s.kind?`<span class="badge">${s.kind}</span>`:''}</h3>
           <div class="meta">${s.folders.length} Mappe${s.folders.length===1?'':'n'} · ${countItems(s)} Einträge</div>
-        </div>`).join('')}
+          ${ne?`<div class="examline">⏳ Prüfung in <span data-cd="${ne.at}">${shortLeft(new Date(ne.at)-Date.now())}</span></div>`:''}
+        </div>`; }).join('')}
     </div>
-    <h2 style="font-size:17px;margin:32px 0 12px">Zuletzt bearbeitet</h2>
+    <h2 class="sec">Zuletzt bearbeitet</h2>
     ${recent.length ? `<div class="list">${recent.slice(0,6).map(itemRow).join('')}</div>`
-      : `<div class="empty">Noch nichts angelegt. Wähle ein Fach, erstelle eine Mappe (z. B. „Weimarer Republik“) und leg los!</div>`}`;
+      : `<div class="empty">Noch nichts angelegt. Wähle ein Fach, erstelle eine Mappe (z. B. „Weimarer Republik“) und leg los – oder lass die KI einen Lernzettel schreiben.</div>`}`;
 }
 
 function itemRow({s,f,i}){
@@ -262,8 +505,13 @@ function itemRow({s,f,i}){
   const sub = i.type === 'cards' ? `${filled(i).length} Karteikarten` : 'Lernzettel';
   return `<div class="row" onclick="go({view:'item',s:'${s.id}',f:'${f.id}',i:'${i.id}'})">
     <span class="ic">${ic}</span>
-    <div class="t"><b>${esc(i.title)}</b><small><span class="dot" style="display:inline-block;background:${s.color};margin-right:5px"></span>${esc(s.name)} › ${esc(f.name)} · ${sub} · ${fmtDate(i.updated)}</small></div>
+    <div class="t"><b>${esc(i.title)}</b><small><span class="dot" style="background:${s.color};margin-right:5px"></span>${esc(s.name)} › ${esc(f.name)} · ${sub} · ${fmtDate(i.updated)}</small></div>
   </div>`;
+}
+
+function examBanner(s){
+  const ne = nextExamFor(s.id); if(!ne) return '';
+  return `<div class="banner" style="--c:${s.color}">⏳ <b>${esc(ne.note||'Prüfung')}</b> am ${fmtExam(ne.at)} – noch <b data-cd="${ne.at}">${shortLeft(new Date(ne.at)-Date.now())}</b></div>`;
 }
 
 function viewSubject(){
@@ -273,6 +521,7 @@ function viewSubject(){
     <div class="head">${menuBtn}<h1>${s.icon||''} ${esc(kindLabel(s)+s.name)}</h1>
       <button class="btn primary" onclick="newFolder('${s.id}')">＋ Neue Mappe</button>
     </div>
+    ${examBanner(s)}
     ${s.folders.length ? `<div class="grid">${s.folders.map(f => `
       <div class="card" style="--c:${s.color}" onclick="go({view:'folder',s:'${s.id}',f:'${f.id}'})">
         <div class="bar"></div>
@@ -289,68 +538,89 @@ function viewFolder(){
   return `
     ${crumbs([['Fächer',{view:'home'}],[kindLabel(s)+s.name,{view:'subject',s:s.id}],[f.name]])}
     <div class="head">${menuBtn}<h1>📁 ${esc(f.name)}</h1>
+      <button class="btn ai" onclick="aiCreate()">✨ Mit KI erstellen</button>
       <button class="btn primary" onclick="newItem('note')">＋ Lernzettel</button>
       <button class="btn primary" onclick="newItem('cards')">＋ Karteikarten</button>
       <button class="btn small" onclick="renameFolder()">Umbenennen</button>
       <button class="btn small danger" onclick="deleteFolder()">Löschen</button>
     </div>
     ${items.length ? `<div class="list">${items.map(i => itemRow({s,f,i})).join('')}</div>`
-      : `<div class="empty">Diese Mappe ist leer.<br>📝 <b>Lernzettel</b> für Zusammenfassungen · 🗂️ <b>Karteikarten</b> zum Abfragen</div>`}`;
+      : `<div class="empty">Diese Mappe ist leer.<br>📝 <b>Lernzettel</b> für Zusammenfassungen · 🗂️ <b>Karteikarten</b> zum Abfragen · ✨ <b>KI</b> erstellt beides für dich</div>`}`;
+}
+
+function aiStatusBox(){
+  return ai.busy ? `<div class="aistatus no-print"><span class="spin"></span><span id="ai-msg">${esc(ai.msg)}</span><button class="btn small" style="margin-left:auto" onclick="ai.stop()">Stopp</button></div>` : '';
 }
 
 function viewItem(){
   const s = getS(route.s), f = getF(s, route.f), i = getI(f, route.i); if(!i) return viewFolder();
+  const busyHere = ai.busy && ai.itemId === i.id;
   const head = `${crumbs([['Fächer',{view:'home'}],[kindLabel(s)+s.name,{view:'subject',s:s.id}],[f.name,{view:'folder',s:s.id,f:f.id}],[i.title]])}
     <div class="head no-print">${menuBtn}
-      <input class="title-in" id="title" value="${esc(i.title)}" style="flex:1">
+      <input class="title-in" id="title" value="${esc(i.title)}" aria-label="Titel">
       <span class="saved" id="saved"></span>
-      ${i.type==='note' ? `<button class="btn small" onclick="window.print()">🖨 Drucken</button>` : ''}
+      ${i.type==='note' && !inClaude ? `<button class="btn small" onclick="window.print()">🖨 Drucken</button>` : ''}
       <button class="btn small danger" onclick="deleteItem()">Löschen</button>
     </div>`;
   if(i.type === 'note'){
-    return head + `
+    return head + aiStatusBox() + `
+      <div class="aibar no-print">
+        <span class="lbl">✨ KI</span>
+        <button class="btn small ai" onclick="aiRewrite('improve')" ${ai.busy?'disabled':''}>Überarbeiten & ergänzen</button>
+        <button class="btn small ai" onclick="aiRewrite('short')" ${ai.busy?'disabled':''}>Aufs Wichtigste kürzen</button>
+        <button class="btn small ai" onclick="aiCardsFromNote()" ${ai.busy?'disabled':''}>Karteikarten daraus</button>
+        ${undoStore[i.id] !== undefined ? `<button class="btn small" onclick="undoAi()">↶ Rückgängig</button>` : ''}
+        <div class="askbox" style="flex-basis:100%">
+          <input id="askq" placeholder="Frage zum Lernzettel stellen, z. B. „Erklär mir die Ursachen einfacher“" ${ai.busy?'disabled':''}>
+          <button class="btn small ai" onclick="aiAsk()" ${ai.busy?'disabled':''}>Fragen</button>
+        </div>
+        ${answers[i.id] ? `<div class="answer" style="flex-basis:100%" id="answer">${md(answers[i.id])}</div>` : ''}
+      </div>
       <div class="editor" style="--c:${s.color}">
-        <div class="no-print"><textarea id="ta" placeholder="Schreibe hier deinen Lernzettel…">${esc(i.content)}</textarea>
+        <div class="no-print"><textarea id="ta" ${busyHere?'readonly':''} placeholder="Schreibe hier deinen Lernzettel…">${esc(i.content)}</textarea>
           <div class="hint"># Überschrift · ## Unterpunkt · **fett** · *kursiv* · ==markiert== · - Liste · 1. Aufzählung · &gt; Merksatz · | Tabelle | … |</div></div>
         <div class="preview" id="pv">${md(i.content)}</div>
       </div>`;
   }
   const mode = route.mode || (filled(i).length ? 'learn' : 'edit');
-  return head + `
+  return head + aiStatusBox() + `
     <div class="tabs no-print">
       <button class="${mode==='learn'?'on':''}" onclick="go({...route,mode:'learn'})">🎯 Lernen</button>
-      <button class="${mode==='edit'?'on':''}" onclick="go({...route,mode:'edit'})">✏️ Karten bearbeiten (${i.cards.length})</button>
+      <button class="${mode==='edit'?'on':''}" onclick="go({...route,mode:'edit'})">✏️ Karten bearbeiten (${filled(i).length})</button>
     </div>
     <div style="--c:${s.color}">${mode==='edit' ? cardsEditor(i) : learnView(i)}</div>`;
 }
 
 function cardsEditor(i){
   return `
-    <div class="qa" style="font-weight:600;color:var(--muted);font-size:13px"><span></span><span>Vorderseite (Frage / Begriff)</span><span>Rückseite (Antwort)</span><span></span></div>
+    <div class="aibar"><span class="lbl">✨ KI</span>
+      <button class="btn small ai" onclick="aiMoreCards()" ${ai.busy?'disabled':''}>Weitere Karten vorschlagen</button></div>
+    <div class="qa" style="font-weight:600;color:var(--muted);font-size:13px"><span class="n"></span><span>Vorderseite (Frage / Begriff)</span><span>Rückseite (Antwort)</span><span></span></div>
     ${i.cards.map((c,k) => `
       <div class="qa">
         <span class="n">${k+1}</span>
-        <textarea data-k="${k}" data-side="q" placeholder="Frage">${esc(c.q)}</textarea>
-        <textarea data-k="${k}" data-side="a" placeholder="Antwort">${esc(c.a)}</textarea>
-        <button class="btn small danger" title="Karte löschen" onclick="delCard(${k})">✕</button>
+        <textarea data-k="${k}" data-side="q" placeholder="Frage" aria-label="Frage ${k+1}">${esc(c.q)}</textarea>
+        <textarea data-k="${k}" data-side="a" placeholder="Antwort" aria-label="Antwort ${k+1}">${esc(c.a)}</textarea>
+        <button class="btn small danger" title="Karte löschen" aria-label="Karte löschen" onclick="delCard(${k})">✕</button>
       </div>`).join('')}
     <button class="btn" onclick="addCard()">＋ Karte hinzufügen</button>`;
 }
 
-/* Lernmodus: Karten, die man nicht wusste, kommen erneut dran */
+/* ---------- Lernmodus: nicht gewusste Karten kommen erneut dran ---------- */
 let session = null;
 function startSession(i, onlyWrong){
-  const pool = i.cards.map((c,k)=>k).filter(k => (i.cards[k].q||i.cards[k].a) && (!onlyWrong || (i.cards[k].box||0) === 0));
+  const pool = i.cards.map((c,k) => k).filter(k => ((i.cards[k].q||'').trim() || (i.cards[k].a||'').trim()) && (!onlyWrong || (i.cards[k].box||0) === 0));
   for(let a = pool.length-1; a > 0; a--){ const b = Math.floor(Math.random()*(a+1)); [pool[a],pool[b]] = [pool[b],pool[a]]; }
-  session = {id:i.id, queue:pool, total:pool.length, right:0, wrong:0, flipped:false};
+  session = {id:i.id, queue:pool, total:pool.length, right:0, wrong:0, flipped:false, missed:new Set()};
 }
 function learnView(i){
-  if(!filled(i).length) return `<div class="empty">Noch keine Karten. Wechsle zu „Karten bearbeiten“.</div>`;
+  const all = filled(i);
+  if(!all.length) return `<div class="empty">Noch keine Karten. Wechsle zu „Karten bearbeiten“.</div>`;
   if(!session || session.id !== i.id) startSession(i, false);
-  const all = filled(i), known = all.filter(c => (c.box||0) > 0).length;
+  const known = all.filter(c => (c.box||0) > 0).length;
   const stats = `<p style="color:var(--muted)">Insgesamt gewusst: ${known} / ${all.length} Karten</p>`;
   if(!session.queue.length){
-    return `<div class="learn"><div class="flip" style="cursor:default">🎉<br><b>Runde geschafft!</b><br><span style="font-size:15px;color:var(--muted)">Beim ersten Versuch gewusst: ${session.right} · nochmal wiederholt: ${session.wrong}</span></div>
+    return `<div class="learn"><div class="flip" style="cursor:default">🎉<br><b>Runde geschafft!</b><br><span style="font-size:15px;color:var(--muted)">Beim ersten Versuch gewusst: ${session.right} · wiederholt: ${session.wrong}</span></div>
       ${stats}<div class="actions"><button class="btn primary" onclick="restart(false)">Alle nochmal</button>
       ${known < all.length ? `<button class="btn" onclick="restart(true)">Nur Ungewusste</button>`:''}</div></div>`;
   }
@@ -359,7 +629,7 @@ function learnView(i){
   return `<div class="learn">
     <div class="progress"><div style="width:${session.total ? done/session.total*100 : 0}%"></div></div>
     <div style="color:var(--muted);font-size:13px;margin-bottom:10px">Noch ${session.queue.length} Karte${session.queue.length===1?'':'n'} in dieser Runde</div>
-    <div class="flip" onclick="flipCard()">
+    <div class="flip" onclick="flipCard()" role="button" tabindex="0">
       <small>${session.flipped ? 'Antwort' : 'Frage'} · zum Umdrehen klicken / Leertaste</small>
       ${esc(session.flipped ? c.a : c.q)}
     </div>
@@ -369,50 +639,54 @@ function learnView(i){
     ${stats}
   </div>`;
 }
-function curItem(){ const s=getS(route.s), f=getF(s,route.f); return getI(f,route.i); }
-function flipCard(){ session.flipped = !session.flipped; render(); }
+function flipCard(){ if(!session?.queue.length) return; session.flipped = !session.flipped; render(); }
 function answer(ok){
   const i = curItem(), k = session.queue.shift(), c = i.cards[k];
-  if(ok){ if(!c._missed) session.right++; c.box = Math.min((c.box||0)+1, 5); delete c._missed; }
-  else { if(!c._missed) session.wrong++; c._missed = true; c.box = 0; session.queue.splice(Math.min(3, session.queue.length), 0, k); }
+  if(ok){ if(!session.missed.has(k)) session.right++; c.box = Math.min((c.box||0)+1, 5); }
+  else { if(!session.missed.has(k)) session.wrong++; session.missed.add(k); c.box = 0; session.queue.splice(Math.min(3, session.queue.length), 0, k); }
   session.flipped = false; save(); render();
 }
 function restart(onlyWrong){ startSession(curItem(), onlyWrong); render(); }
 
 function viewSearch(){
   const q = query.trim().toLowerCase(), hits = [];
-  state.subjects.forEach(s => s.folders.forEach(f => {
-    f.items.forEach(i => {
-      const txt = (i.title + ' ' + (i.type==='note' ? i.content : i.cards.map(c=>c.q+' '+c.a).join(' '))).toLowerCase();
-      if(txt.includes(q) || f.name.toLowerCase().includes(q)) hits.push({s,f,i});
-    });
-  }));
+  state.subjects.forEach(s => s.folders.forEach(f => f.items.forEach(i => {
+    const txt = (i.title + ' ' + (i.type==='note' ? i.content : i.cards.map(c=>c.q+' '+c.a).join(' '))).toLowerCase();
+    if(txt.includes(q) || f.name.toLowerCase().includes(q)) hits.push({s,f,i});
+  })));
   return `<div class="head">${menuBtn}<h1>Suche: „${esc(query)}“</h1></div>
     ${hits.length ? `<div class="list">${hits.map(itemRow).join('')}</div>` : `<div class="empty">Keine Treffer.</div>`}`;
 }
 
-/* ---------- Render ---------- */
+/* =========================================================
+   Rendern & Speichern beim Tippen
+   ========================================================= */
 function render(){
+  const ae = document.activeElement, keepAsk = ae?.id === 'askq' ? ae.value : null;
   renderSide();
-  const v = {home:viewHome, subject:viewSubject, folder:viewFolder, item:viewItem, search:viewSearch}[route.view] || viewHome;
+  const v = {home:viewHome, subject:viewSubject, folder:viewFolder, item:viewItem, search:viewSearch, exams:viewExams}[route.view] || viewHome;
   $('#main').innerHTML = v();
-  bindItem();
+  bindItem(); tick();
+  if(keepAsk !== null && $('#askq')){ $('#askq').value = keepAsk; $('#askq').focus(); }
 }
 let saveTimer;
-function touched(){
-  const i = curItem(); i.updated = Date.now();
+function touched(i = curItem()){
+  i.updated = Date.now();
   clearTimeout(saveTimer); const el = $('#saved'); if(el) el.textContent = '…';
-  saveTimer = setTimeout(() => { save(); const el=$('#saved'); if(el) el.textContent = '✓ gespeichert'; }, 400);
+  saveTimer = setTimeout(() => { save(); const el = $('#saved'); if(el) el.textContent = '✓ gespeichert'; }, 400);
 }
 function bindItem(){
   if(route.view !== 'item') return;
   const i = curItem(); if(!i) return;
   const t = $('#title'); if(t) t.oninput = () => { i.title = t.value || 'Ohne Titel'; touched(); };
-  const ta = $('#ta'); if(ta) ta.oninput = () => { i.content = ta.value; $('#pv').innerHTML = md(ta.value); touched(); };
+  const ta = $('#ta'); if(ta) ta.oninput = () => { i.content = ta.value; $('#pv').innerHTML = md(ta.value); delete undoStore[i.id]; touched(); };
   document.querySelectorAll('.qa textarea').forEach(el => el.oninput = () => { i.cards[+el.dataset.k][el.dataset.side] = el.value; session = null; touched(); });
+  const aq = $('#askq'); if(aq) aq.onkeydown = e => { if(e.key === 'Enter') aiAsk(); };
 }
 
-/* ---------- Aktionen ---------- */
+/* =========================================================
+   Aktionen
+   ========================================================= */
 async function newFolder(sid){
   const name = await ask('Neue Mappe', '', 'Anlegen'); if(!name) return;
   const f = {id:uid(), name, items:[]}; getS(sid).folders.push(f); save();
@@ -423,42 +697,48 @@ async function renameFolder(){
   const name = await ask('Mappe umbenennen', f.name); if(!name) return;
   f.name = name; save(); render();
 }
-function deleteFolder(){
+async function deleteFolder(){
   const s = getS(route.s), f = getF(s, route.f);
-  if(!confirm(`Mappe „${f.name}“ mit ${f.items.length} Einträgen wirklich löschen?`)) return;
+  if(!await confirmBox(`Mappe „${f.name}“ mit ${f.items.length} Einträgen wirklich löschen?`)) return;
   s.folders = s.folders.filter(x => x !== f); save(); go({view:'subject', s:s.id});
+}
+function addItem(f, type, title, data = {}){
+  const i = {id:uid(), type, title, updated:Date.now(), ...data};
+  if(type === 'note' && i.content === undefined) i.content = `# ${title}\n\n## Wichtige Begriffe\n- \n\n## Zusammenfassung\n\n> `;
+  if(type === 'cards' && !i.cards) i.cards = [{q:'',a:''},{q:'',a:''},{q:'',a:''}];
+  f.items.push(i); save(); return i;
 }
 async function newItem(type){
   const f = getF(getS(route.s), route.f);
   const title = await ask(type==='note' ? 'Neuer Lernzettel' : 'Neuer Kartensatz', '', 'Anlegen'); if(!title) return;
-  const i = {id:uid(), type, title, updated:Date.now()};
-  if(type === 'note') i.content = `# ${title}\n\n## Wichtige Begriffe\n- \n\n## Zusammenfassung\n\n> `;
-  else i.cards = [{q:'',a:''},{q:'',a:''},{q:'',a:''}];
-  f.items.push(i); save();
+  const i = addItem(f, type, title);
   go({view:'item', s:route.s, f:f.id, i:i.id, mode: type==='cards' ? 'edit' : undefined});
 }
-function deleteItem(){
+async function deleteItem(){
   const f = getF(getS(route.s), route.f), i = getI(f, route.i);
-  if(!confirm(`„${i.title}“ wirklich löschen?`)) return;
+  if(!await confirmBox(`„${i.title}“ wirklich löschen?`)) return;
   f.items = f.items.filter(x => x !== i); save(); go({view:'folder', s:route.s, f:route.f});
 }
-function addCard(){ const i = curItem(); i.cards.push({q:'',a:''}); touched(); render(); const tas=document.querySelectorAll('.qa textarea'); tas[tas.length-2]?.focus(); }
+function addCard(){ const i = curItem(); i.cards.push({q:'',a:''}); touched(); render(); const tas = document.querySelectorAll('.qa textarea'); tas[tas.length-2]?.focus(); }
 function delCard(k){ const i = curItem(); i.cards.splice(k,1); session = null; touched(); render(); }
 
-function exportData(){
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `lernmappe-${new Date().toISOString().slice(0,10)}.json`; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+async function exportData(){
+  const data = JSON.stringify(state, null, 2), filename = `lernmappe-${new Date().toISOString().slice(0,10)}.json`;
+  if(inClaude){
+    if(!downloads){ toast('Export ist in dieser Ansicht nicht verfügbar.'); return; }
+    try { await downloads.save({filename, data}); } catch(e){ if(e?.code !== 'cancelled') toast('Export nicht möglich.'); }
+    return;
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], {type:'application/json'}));
+  a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 $('#importFile').onchange = e => {
   const file = e.target.files[0]; if(!file) return;
   const r = new FileReader();
-  r.onload = () => {
-    try { const d = JSON.parse(r.result); if(!Array.isArray(d.subjects)) throw 0;
-      if(confirm('Aktuelle Daten durch die Datei ersetzen?')){ state = d; save(); go({view:'home'}); } }
-    catch(err){ alert('Die Datei ist keine gültige Lernmappe-Sicherung.'); }
+  r.onload = async () => {
     e.target.value = '';
+    let d; try { d = JSON.parse(r.result); if(!Array.isArray(d.subjects)) throw 0; } catch(err){ toast('Die Datei ist keine gültige Lernmappe-Sicherung.'); return; }
+    if(await confirmBox('Aktuelle Daten durch die Datei ersetzen?', 'Ersetzen')){ state = migrate(d); save(); go({view:'home'}); toast('Sicherung geladen'); }
   };
   r.readAsText(file);
 };
@@ -471,14 +751,205 @@ function toggleTheme(){
 try { const t = localStorage.getItem(KEY+'-theme'); if(t) document.documentElement.dataset.theme = t; } catch(e){}
 
 document.addEventListener('keydown', e => {
-  if(route.view !== 'item' || !session || ['TEXTAREA','INPUT'].includes(document.activeElement.tagName)) return;
+  if(route.view !== 'item' || !session || ['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName) || $('.modal-bg')) return;
   if(!$('.flip')) return;
   if(e.code === 'Space'){ e.preventDefault(); flipCard(); }
   else if(session.flipped && e.key === '1') answer(false);
   else if(session.flipped && e.key === '2') answer(true);
 });
 
+/* =========================================================
+   KI-Funktionen
+   ========================================================= */
+const undoStore = {};   // vorheriger Text je Lernzettel (nur für diese Sitzung)
+const answers = {};     // letzte KI-Antwort je Lernzettel
+const ai = {
+  busy:false, msg:'', itemId:null, ctl:null,
+  start(msg, itemId = null){ this.busy = true; this.msg = msg; this.itemId = itemId; this.ctl = new AbortController(); render(); return this.ctl.signal; },
+  setMsg(m){ this.msg = m; const el = $('#ai-msg'); if(el) el.textContent = m; },
+  stop(){ this.ctl?.abort(); },
+  end(){ this.busy = false; this.itemId = null; this.ctl = null; render(); }
+};
+const AI_ERR = {
+  not_granted:'Du hast der Seite die KI-Nutzung nicht erlaubt. Lade die Seite neu, um erneut gefragt zu werden.',
+  rate_limited:'Gerade zu viele Anfragen. Warte einen Moment und versuch es dann nochmal.',
+  prompt_too_large:'Das Material ist zu lang. Kürze den eingefügten Text und versuch es nochmal.',
+  refused:'Die KI hat diese Anfrage abgelehnt. Formuliere das Thema anders.',
+  invalid_json:'Die Antwort der KI war nicht lesbar. Versuch es bitte nochmal.',
+  cancelled:'Abgebrochen.',
+  session_expired:'Deine Anmeldung ist abgelaufen. Lade die Seite neu.',
+  empty_completion:'Die KI hat nichts geliefert. Versuch es nochmal.',
+};
+const aiErr = e => AI_ERR[e?.code] || 'Die KI ist gerade nicht erreichbar. Versuch es später nochmal.';
+function aiReady(){
+  if(ai.busy){ toast('Die KI arbeitet noch – bitte kurz warten.'); return false; }
+  if(sample) return true;
+  toast(inClaude ? 'Die KI ist in dieser Ansicht nicht verfügbar.' : 'Die KI funktioniert in der Claude-Version der Lernmappe (Link aus dem Chat). Diese lokale Datei hat keinen KI-Zugang.', 6000);
+  return false;
+}
+
+function subjectContext(s){
+  const kinds = {LK:'Leistungskurs (erhöhtes Anforderungsniveau)', P4:'4. Prüfungsfach im Abitur (schriftlich)', P5:'5. Prüfungsfach im Abitur (Präsentation/mündlich)'};
+  const ne = nextExamFor(s.id);
+  return `Ich bin Schüler/in der gymnasialen Oberstufe in Deutschland und bereite mich aufs Abitur vor.
+Fach: ${s.name}${s.kind ? ' – ' + kinds[s.kind] : ' (Grundkurs)'}.` + (ne ? `\nMeine nächste Prüfung in diesem Fach ist am ${fmtExam(ne.at)}.` : '');
+}
+const langRule = s => s.name === 'Englisch'
+  ? 'Schreibe den Inhalt auf Englisch (Fachbegriffe ggf. mit deutscher Übersetzung in Klammern).'
+  : 'Schreibe auf Deutsch.';
+const FORMAT = `FORMAT – halte dich genau daran, denn der Text wird von einer einfachen Anzeige dargestellt:
+- "# Titel" genau einmal ganz oben
+- "## Abschnitt" und "### Unterabschnitt" für die Gliederung
+- "- " für Stichpunkte, "1. " für Abfolgen
+- **fett** für Schlüsselbegriffe, ==markiert== nur für das Allerwichtigste (sparsam), *kursiv* für Beispiele
+- "> " am Zeilenanfang für einen kurzen Merksatz (wird als Merkkasten angezeigt; je Abschnitt höchstens einer)
+- Tabellen als | Spalte | Spalte | mit Kopfzeile und Trennzeile |---|---|, z. B. für Zeitleisten oder Vergleiche
+- Keine verschachtelten Listen, keine Codeblöcke, keine Links, keine Emojis
+- Keine Einleitung wie "Hier ist…" und keine Schlussbemerkung – nur der Lernzettel selbst.`;
+
+function notePrompt({s, topic, material, size, extra}){
+  return `${subjectContext(s)}
+
+Erstelle einen Lernzettel zum Thema: "${topic}".
+Umfang: ${size === 'lang' ? 'ausführlich (gründliche Zusammenfassung, ca. 1–2 Seiten)' : 'kompakt (das Wichtigste auf ca. einer halben bis einer Seite)'}.
+${material ? 'Stütze dich vor allem auf mein Unterrichtsmaterial unten. Ergänze nur gesichertes Standardwissen und erfinde keine Fakten, Daten oder Zitate.' : 'Verwende nur gesichertes Fachwissen. Wenn du dir bei einem Detail (Jahreszahl, Zahl, Zitat) nicht sicher bist, lass es weg.'}
+${extra ? 'Zusätzliche Wünsche: ' + extra : ''}
+${langRule(s)}
+
+Inhaltlich:
+- Klare Gliederung, Fachbegriffe kurz erklärt, Zusammenhänge (Ursache → Folge) sichtbar machen
+- Wo passend: Zeitleiste, Vergleichstabelle, Formeln oder Beispiele
+- Am Ende ein Abschnitt "## Typische Prüfungsfragen" mit 3–5 Aufgaben mit Operatoren (z. B. nennen, erläutern, analysieren, beurteilen) passend zum Anforderungsniveau
+
+${FORMAT}${material ? `\n\nMEIN MATERIAL:\n"""\n${material.slice(0, 60000)}\n"""` : ''}`;
+}
+function cardsPrompt({s, topic, source, n, existing}){
+  return `${subjectContext(s)}
+
+Erstelle ${n} Karteikarten zum Thema "${topic}" für die Abiturvorbereitung.
+${source ? 'Grundlage ist dieser Lernzettel – nimm die Karten daraus und erfinde nichts dazu:\n"""\n' + source.slice(0, 60000) + '\n"""' : 'Verwende nur gesichertes Fachwissen.'}
+${existing?.length ? 'Diese Karten gibt es schon, wiederhole sie nicht:\n' + existing.map(c => '- ' + c.q).join('\n') : ''}
+${langRule(s)}
+Mische Begriffe/Definitionen, Daten/Fakten und Verständnisfragen ("Warum…?", "Erkläre…"). Antworten kurz und prüfungstauglich (1–3 Sätze oder Stichpunkte, Zeilenumbrüche erlaubt).
+
+Antworte nur mit einem JSON-Array: [{"q": "Frage", "a": "Antwort"}, ...]`;
+}
+function cleanCards(arr){
+  return (Array.isArray(arr) ? arr : []).filter(c => c && (c.q || c.a)).map(c => ({q:String(c.q ?? '').trim(), a:String(c.a ?? '').trim()}));
+}
+
+/* Neuer Lernzettel / Karteikarten in der aktuellen Mappe */
+async function aiCreate(){
+  if(!aiReady()) return;
+  const s = getS(route.s), f = getF(s, route.f);
+  const r = await modal('✨ Mit KI erstellen', `
+    <label for="ai-topic">Thema</label>
+    <input name="topic" id="ai-topic" required value="${esc(f.name)}" placeholder="z. B. Hyperinflation 1923">
+    <div class="two">
+      <div><label for="ai-what">Was soll entstehen?</label>
+        <select name="what" id="ai-what"><option value="both">Lernzettel + Karteikarten</option><option value="note">Nur Lernzettel</option><option value="cards">Nur Karteikarten</option></select></div>
+      <div><label for="ai-size">Umfang</label>
+        <select name="size" id="ai-size"><option value="kurz">Kompakt</option><option value="lang">Ausführlich</option></select></div>
+    </div>
+    <label for="ai-mat">Unterrichtsmaterial (optional)</label>
+    <textarea name="material" id="ai-mat" placeholder="Füge hier Mitschriften, Arbeitsblatt-Text oder Stichpunkte ein – die KI richtet sich dann danach."></textarea>
+    <label for="ai-extra">Besondere Wünsche (optional)</label>
+    <input name="extra" id="ai-extra" placeholder="z. B. Fokus auf Ursachen und Folgen, mit Zeitleiste">`, 'Erstellen', {wide:true});
+  if(!r) return;
+  const topic = r.topic.trim(), material = r.material.trim(), extra = r.extra.trim();
+  if(r.what === 'cards') return aiNewCards(s, f, topic, material || null);
+
+  const i = addItem(f, 'note', topic, {content:''});
+  go({view:'item', s:s.id, f:f.id, i:i.id});
+  const signal = ai.start('Die KI schreibt deinen Lernzettel…', i.id);
+  try{
+    const {text, truncated} = await sample(notePrompt({s, topic, material, size:r.size, extra}), {
+      signal, modelTier:'default',
+      onText: ({text}) => { ai.setMsg('Die KI schreibt deinen Lernzettel…'); streamInto(i, text); }
+    });
+    streamInto(i, text); touched(i);
+    if(truncated) toast('Der Lernzettel wurde abgeschnitten – wähle „Kompakt“ oder ein engeres Thema.');
+  } catch(e){
+    if(e.text) streamInto(i, e.text);
+    touched(i); toast(aiErr(e), 6000); ai.end(); return;
+  }
+  ai.end();
+  if(r.what === 'both') await aiNewCards(s, f, topic, i.content, true);
+  else toast('Lernzettel fertig ✓');
+}
+function streamInto(i, text){
+  i.content = text;
+  if(route.view === 'item' && route.i === i.id){
+    const ta = $('#ta'), pv = $('#pv');
+    if(ta){ ta.value = text; ta.scrollTop = ta.scrollHeight; }
+    if(pv) pv.innerHTML = md(text);
+  }
+}
+async function aiNewCards(s, f, topic, source, stayOnNote){
+  const signal = ai.start('Die KI erstellt Karteikarten…');
+  try{
+    const arr = cleanCards(await sample.json(cardsPrompt({s, topic, source, n: source ? '12 bis 20' : '15'}), {signal, modelTier:'default'}));
+    if(!arr.length) throw {code:'invalid_json'};
+    const i = addItem(f, 'cards', `${topic} – Karteikarten`, {cards:arr});
+    ai.end();
+    if(stayOnNote) toast(`Lernzettel fertig ✓ – außerdem ${arr.length} Karteikarten in der Mappe angelegt`, 5000);
+    else { go({view:'item', s:s.id, f:f.id, i:i.id, mode:'learn'}); toast(`${arr.length} Karteikarten erstellt ✓`); }
+  } catch(e){ ai.end(); toast(aiErr(e), 6000); }
+}
+function aiCardsFromNote(){
+  if(!aiReady()) return;
+  const s = getS(route.s), f = getF(s, route.f), i = curItem();
+  if(i.content.trim().length < 40){ toast('Schreib erst etwas mehr in den Lernzettel.'); return; }
+  aiNewCards(s, f, i.title, i.content, false);
+}
+async function aiMoreCards(){
+  if(!aiReady()) return;
+  const s = getS(route.s), i = curItem(), existing = filled(i);
+  const signal = ai.start('Die KI schlägt weitere Karten vor…', i.id);
+  try{
+    const arr = cleanCards(await sample.json(cardsPrompt({s, topic:i.title, source:null, n:'10', existing}), {signal, modelTier:'default'}));
+    if(!arr.length) throw {code:'invalid_json'};
+    i.cards = [...existing, ...arr]; session = null; touched(i);
+    ai.end(); toast(`${arr.length} neue Karten ergänzt ✓`);
+  } catch(e){ ai.end(); toast(aiErr(e), 6000); }
+}
+async function aiRewrite(kind){
+  if(!aiReady()) return;
+  const s = getS(route.s), i = curItem();
+  if(i.content.trim().length < 20){ toast('Der Lernzettel ist noch leer – nutze in der Mappe „✨ Mit KI erstellen“.'); return; }
+  const task = kind === 'improve'
+    ? 'Überarbeite meinen Lernzettel: korrigiere fachliche und sprachliche Fehler, gliedere ihn klarer, erkläre Fachbegriffe und ergänze wichtige fehlende Punkte. Behalte meinen Inhalt und meine Schwerpunkte bei.'
+    : 'Kürze meinen Lernzettel auf das Prüfungsrelevante: höchstens etwa die Hälfte der Länge, knappe Stichpunkte, nichts Wichtiges weglassen.';
+  undoStore[i.id] = i.content;
+  const signal = ai.start(kind === 'improve' ? 'Die KI überarbeitet deinen Lernzettel…' : 'Die KI kürzt deinen Lernzettel…', i.id);
+  try{
+    const {text} = await sample(`${subjectContext(s)}\n\n${task}\n${langRule(s)}\n\n${FORMAT}\n\nMEIN LERNZETTEL:\n"""\n${i.content.slice(0, 60000)}\n"""`, {
+      signal, modelTier:'default', cache:false, onText: ({text}) => streamInto(i, text)
+    });
+    streamInto(i, text); touched(i); ai.end(); toast('Fertig ✓ – mit „↶ Rückgängig“ holst du die alte Fassung zurück.', 5000);
+  } catch(e){
+    i.content = undoStore[i.id]; delete undoStore[i.id]; touched(i); ai.end();
+    toast(aiErr(e) + (e?.code === 'cancelled' ? '' : ' Dein Lernzettel ist unverändert.'), 6000);
+  }
+}
+function undoAi(){ const i = curItem(); if(undoStore[i.id] === undefined) return; i.content = undoStore[i.id]; delete undoStore[i.id]; touched(i); render(); toast('Alte Fassung wiederhergestellt'); }
+async function aiAsk(){
+  const q = $('#askq')?.value.trim(); if(!q) return;
+  if(!aiReady()) return;
+  const s = getS(route.s), i = curItem();
+  answers[i.id] = '…';
+  const signal = ai.start('Die KI antwortet…', i.id);
+  try{
+    const {text} = await sample(`${subjectContext(s)}\n\nHier ist mein Lernzettel "${i.title}":\n"""\n${i.content.slice(0, 60000)}\n"""\n\nMeine Frage dazu: ${q}\n\nAntworte verständlich und prüfungsnah, eher kurz (höchstens etwa 200 Wörter). ${langRule(s)} Formatierung: nur **fett**, - Stichpunkte und kurze Absätze.`, {
+      signal, modelTier:'default', onText: ({text}) => { answers[i.id] = text; const a = $('#answer'); if(a) a.innerHTML = md(text); }
+    });
+    answers[i.id] = text;
+  } catch(e){ answers[i.id] = (e.text ? e.text + '\n\n' : '') + aiErr(e); }
+  ai.end(); const box = $('#askq'); if(box) box.value = '';
+}
+
 render();
+cloud.init();
 </script>
 </body>
 </html>
