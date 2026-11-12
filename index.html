@@ -10,19 +10,19 @@
 :root{
   --bg:#f4f5f8;--panel:#ffffff;--panel2:#eef0f5;--text:#1b2130;--muted:#677087;--line:#dfe3ec;
   --accent:#3b63d9;--accent-soft:#e6ecfc;--danger:#cf3f3f;--ok:#278a52;--warn:#d98b12;--ai:#7a4fd6;--ai-soft:#f0eafd;
-  --mark:#ffe46b;--shadow:0 1px 3px rgba(20,30,60,.07);
+  --mark:#ffe46b;--shadow:0 1px 3px rgba(20,30,60,.07);--ok-soft:#e3f4ea;--danger-soft:#fbe7e7;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#13161c;--panel:#1b1f27;--panel2:#252a35;--text:#e5e8ef;--muted:#949cb0;--line:#2f3542;
     --accent:#6f91f0;--accent-soft:#232c45;--danger:#ef6b6b;--ok:#4cc27e;--warn:#f0a83a;--ai:#a988f2;--ai-soft:#2a2340;
-    --mark:#b89a1c;--shadow:none;color-scheme:dark;
+    --mark:#b89a1c;--shadow:none;--ok-soft:#1d3327;--danger-soft:#3a2224;color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#13161c;--panel:#1b1f27;--panel2:#252a35;--text:#e5e8ef;--muted:#949cb0;--line:#2f3542;
   --accent:#6f91f0;--accent-soft:#232c45;--danger:#ef6b6b;--ok:#4cc27e;--warn:#f0a83a;--ai:#a988f2;--ai-soft:#2a2340;
-  --mark:#b89a1c;--shadow:none;color-scheme:dark;
+  --mark:#b89a1c;--shadow:none;--ok-soft:#1d3327;--danger-soft:#3a2224;color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -179,6 +179,54 @@ h2.sec .btn{margin-left:auto}
 .modal .chk input{width:auto;margin:0}
 .filetext{white-space:pre-wrap;background:var(--panel2);border-radius:8px;padding:10px 12px;max-height:50vh;overflow:auto;font-size:13.5px;margin-bottom:14px}
 .modal img.prev{max-width:100%;border-radius:8px;margin-bottom:14px}
+/* Quiz, Erklär-Modus, Probeklausur */
+.quizcard{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--c,var(--accent));border-radius:14px;padding:22px;max-width:760px;margin:0 auto;box-shadow:var(--shadow)}
+.quizcard .qtype{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.quizcard .qq{font-size:18px;font-weight:600;line-height:1.5}
+.qopts{display:grid;gap:8px;margin-top:16px}
+.qopt{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt b{color:var(--muted);min-width:18px}
+.qopt.right{border-color:var(--ok);background:var(--ok-soft)}
+.qopt.wrong{border-color:var(--danger);background:var(--danger-soft)}
+.qopt:disabled{cursor:default;opacity:1}
+.tfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.gaptext{font-size:17px;line-height:2.2}
+.gapin{border:0;border-bottom:2px solid var(--accent);background:var(--panel2);padding:2px 6px;border-radius:4px;max-width:100%}
+.gapin.right{border-color:var(--ok);background:var(--ok-soft)}
+.gapin.wrong{border-color:var(--danger);background:var(--danger-soft)}
+.sol{color:var(--ok);font-weight:700;margin:0 4px}
+.fb{margin-top:16px;padding:10px 14px;border-radius:10px;background:var(--panel2);border-left:4px solid var(--muted)}
+.fb.ok{border-color:var(--ok)}.fb.no{border-color:var(--danger)}
+.qnav{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.qmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;max-width:760px;margin:0 auto 8px;gap:10px;flex-wrap:wrap}
+.qwrap .progress{max-width:760px;margin:0 auto 10px}
+.score-big{font-size:44px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.fbhead{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:16px 0 10px}
+.fbhead > div:last-child{flex:1;min-width:200px}
+.fbgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}
+.fbbox{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--k,var(--accent));border-radius:10px;padding:10px 14px;min-width:0}
+.fbbox h4{margin:0 0 6px;font-size:14px}
+.fbbox ul{margin:0;padding-left:18px}
+.fbbox li{margin-bottom:3px}
+.explain textarea,.task textarea.ans{width:100%;min-height:200px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:12px 14px;resize:vertical;line-height:1.55}
+.explain select{width:100%;max-width:520px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-bottom:12px}
+.explain label{display:block;font-weight:600;font-size:13px;margin:14px 0 4px}
+.toolrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.toolrow .grow{flex:1}
+.examtimer{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:16px;box-shadow:0 4px 14px rgba(20,30,60,.08)}
+.examtimer b{font-size:24px;font-variant-numeric:tabular-nums}
+.task{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;min-width:0}
+.task .th{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.task .md p:first-child{margin-top:0}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs span{position:relative}
+.thumbs img{height:72px;border-radius:6px;border:1px solid var(--line);display:block}
+.thumbs button{position:absolute;top:-6px;right:-6px;border-radius:50%;width:22px;height:22px;padding:0;border:1px solid var(--line);background:var(--panel);font-size:12px}
+.intro{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c,var(--accent));border-radius:12px;padding:18px 20px;max-width:760px}
+.intro ul{padding-left:20px}
+details{margin-top:8px}
+details summary{cursor:pointer;color:var(--accent);font-size:14px}
 .menu-toggle{display:none}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
@@ -356,6 +404,7 @@ function md(src){
 
 /* ---------- Dialoge & Hinweise (statt alert/confirm) ---------- */
 function toast(text, ms = 3500){
+  document.querySelectorAll('.toast').forEach(x => x.remove());
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = text;
   document.body.appendChild(t); setTimeout(() => t.remove(), ms);
 }
@@ -406,6 +455,12 @@ function shortLeft(ms){
 }
 function tick(){
   const now = Date.now();
+  document.querySelectorAll('[data-exam-end]').forEach(el => {
+    const ms = +el.dataset.examEnd - now, p = parts(ms), pad = n => String(n).padStart(2,'0');
+    el.textContent = (p.d*24 + p.h ? (p.d*24 + p.h) + ':' : '') + pad(p.m) + ':' + pad(p.s);
+    el.classList.toggle('urg-hi', ms < 5*60000);
+    if(ms <= 0) submitExam(true);
+  });
   document.querySelectorAll('[data-cd]').forEach(el => {
     const ms = new Date(el.dataset.cd) - now;
     if(el.dataset.mode === 'clock'){
@@ -529,8 +584,8 @@ function viewHome(){
 }
 
 function itemRow({s,f,i}){
-  const ic = i.type === 'cards' ? '🗂️' : '📝';
-  const sub = i.type === 'cards' ? `${filled(i).length} Karteikarten` : 'Lernzettel';
+  const ic = ITEM_IC[i.type] || '📝';
+  const sub = itemSub(i);
   return `<div class="row" onclick="go({view:'item',s:'${s.id}',f:'${f.id}',i:'${i.id}'})">
     <span class="ic">${ic}</span>
     <div class="t"><b>${esc(i.title)}</b><small><span class="dot" style="background:${s.color};margin-right:5px"></span>${esc(s.name)} › ${esc(f.name)} · ${sub} · ${fmtDate(i.updated)}</small></div>
@@ -539,7 +594,8 @@ function itemRow({s,f,i}){
 
 function examBanner(s){
   const ne = nextExamFor(s.id); if(!ne) return '';
-  return `<div class="banner" style="--c:${s.color}">⏳ <b>${esc(ne.note||'Prüfung')}</b> am ${fmtExam(ne.at)} – noch <b data-cd="${ne.at}">${shortLeft(new Date(ne.at)-Date.now())}</b></div>`;
+  return `<div class="banner" style="--c:${s.color}">⏳ <b>${esc(ne.note||'Prüfung')}</b> am ${fmtExam(ne.at)} – noch <b data-cd="${ne.at}">${shortLeft(new Date(ne.at)-Date.now())}</b>
+    <button class="btn small" style="margin-left:auto" onclick="createExam()">⏱ Probeklausur schreiben</button></div>`;
 }
 
 function viewSubject(){
@@ -547,15 +603,18 @@ function viewSubject(){
   return `
     ${crumbs([['Fächer',{view:'home'}],[kindLabel(s)+s.name]])}
     <div class="head">${menuBtn}<h1>${s.icon||''} ${esc(kindLabel(s)+s.name)}</h1>
+      <button class="btn" onclick="createQuiz()">🧩 Quiz</button>
+      <button class="btn" onclick="createExam()">⏱ Probeklausur</button>
       <button class="btn primary" onclick="newFolder('${s.id}')">＋ Neue Mappe</button>
     </div>
+    ${aiStatusBox()}
     ${examBanner(s)}
     ${s.folders.length ? `<div class="grid">${s.folders.map(f => `
       <div class="card" style="--c:${s.color}" onclick="go({view:'folder',s:'${s.id}',f:'${f.id}'})">
         <div class="bar"></div>
         <div class="folder-ic">📁</div>
         <h3>${esc(f.name)}</h3>
-        <div class="meta">${f.items.filter(i=>i.type==='note').length} Lernzettel · ${f.items.filter(i=>i.type==='cards').length} Kartensätze${f.files.length?` · ${f.files.length} Datei${f.files.length===1?'':'en'}`:''}</div>
+        <div class="meta">${f.items.filter(i=>i.type==='note').length} Lernzettel · ${f.items.filter(i=>i.type==='cards').length} Kartensätze${f.items.some(i=>i.type==='quiz'||i.type==='exam')?` · ${f.items.filter(i=>i.type==='quiz'||i.type==='exam').length} Tests`:''}${f.files.length?` · ${f.files.length} Datei${f.files.length===1?'':'en'}`:''}</div>
       </div>`).join('')}</div>`
     : `<div class="empty">Noch keine Mappen in ${esc(s.name)}.<br>Lege eine Mappe pro Thema oder Semester an, z. B. „Q1 – Industrialisierung“.</div>`}`;
 }
@@ -567,6 +626,8 @@ function viewFolder(){
     ${crumbs([['Fächer',{view:'home'}],[kindLabel(s)+s.name,{view:'subject',s:s.id}],[f.name]])}
     <div class="head">${menuBtn}<h1>📁 ${esc(f.name)}</h1>
       <button class="btn ai" onclick="aiCreate()">✨ Mit KI erstellen</button>
+      <button class="btn" onclick="createQuiz()">🧩 Quiz</button>
+      <button class="btn" onclick="createExam()">⏱ Probeklausur</button>
       <button class="btn primary" onclick="newItem('note')">＋ Lernzettel</button>
       <button class="btn primary" onclick="newItem('cards')">＋ Karteikarten</button>
       <button class="btn small" onclick="renameFolder()">Umbenennen</button>
@@ -621,6 +682,7 @@ function viewItem(){
         <button class="btn small ai" onclick="aiRewrite('improve')" ${ai.busy?'disabled':''}>Überarbeiten & ergänzen</button>
         <button class="btn small ai" onclick="aiRewrite('short')" ${ai.busy?'disabled':''}>Aufs Wichtigste kürzen</button>
         <button class="btn small ai" onclick="aiCardsFromNote()" ${ai.busy?'disabled':''}>Karteikarten daraus</button>
+        <button class="btn small ai" onclick="createQuiz('${i.id}')" ${ai.busy?'disabled':''}>🧩 Quiz daraus</button>
         ${undoStore[i.id] !== undefined ? `<button class="btn small" onclick="undoAi()">↶ Rückgängig</button>` : ''}
         <div class="askbox" style="flex-basis:100%">
           <input id="askq" placeholder="Frage zum Lernzettel stellen, z. B. „Erklär mir die Ursachen einfacher“" ${ai.busy?'disabled':''}>
@@ -632,9 +694,11 @@ function viewItem(){
       <div class="tabs">
         <button class="${mode==='read'?'on':''}" onclick="go({...route,mode:'read'})">📄 Ansicht</button>
         <button class="${mode==='edit'?'on':''}" onclick="go({...route,mode:'edit'})">✏️ Bearbeiten</button>
+        <button class="${mode==='explain'?'on':''}" onclick="go({...route,mode:'explain'})">🧠 Erklären</button>
       </div>
       <button class="btn small" id="pdfbtn" onclick="notePdf()" ${!i.content.trim()?'disabled':''}>⬇ Als PDF speichern</button>
     </div>`;
+    if(mode === 'explain') return head + aiStatusBox() + bar + `<div style="--c:${s.color}">${explainView(s, f, i)}</div>`;
     if(mode === 'read') return head + aiStatusBox() + bar + `
       <div class="paper-wrap"><article class="paper" id="paper" style="--c:${s.color}">
         ${paperMeta(s, f, i)}
@@ -647,6 +711,8 @@ function viewItem(){
         <div class="preview md" id="pv">${md(i.content)}</div>
       </div>`;
   }
+  if(i.type === 'quiz') return head + aiStatusBox() + `<div style="--c:${s.color}">${viewQuiz(s, f, i)}</div>`;
+  if(i.type === 'exam'){ examCheckTimeout(i); return head + aiStatusBox() + `<div style="--c:${s.color}">${viewExam(s, f, i)}</div>`; }
   const mode = route.mode || (filled(i).length ? 'learn' : 'edit');
   return head + aiStatusBox() + `
     <div class="tabs no-print">
@@ -716,7 +782,7 @@ function restart(onlyWrong){ startSession(curItem(), onlyWrong); render(); }
 function viewSearch(){
   const q = query.trim().toLowerCase(), hits = [];
   state.subjects.forEach(s => s.folders.forEach(f => f.items.forEach(i => {
-    const txt = (i.title + ' ' + (i.type==='note' ? i.content : i.cards.map(c=>c.q+' '+c.a).join(' '))).toLowerCase();
+    const txt = (i.title + ' ' + itemText(i)).toLowerCase();
     if(txt.includes(q) || f.name.toLowerCase().includes(q)) hits.push({s,f,i});
   })));
   const fileHits = [];
@@ -752,6 +818,7 @@ function bindItem(){
   const ta = $('#ta'); if(ta) ta.oninput = () => { i.content = ta.value; $('#pv').innerHTML = md(ta.value); delete undoStore[i.id]; touched(); };
   document.querySelectorAll('.qa textarea').forEach(el => el.oninput = () => { i.cards[+el.dataset.k][el.dataset.side] = el.value; session = null; touched(); });
   const aq = $('#askq'); if(aq) aq.onkeydown = e => { if(e.key === 'Enter') aiAsk(); };
+  bindExtra(i);
 }
 
 /* =========================================================
@@ -1054,6 +1121,667 @@ async function aiAsk(){
     answers[i.id] = text;
   } catch(e){ answers[i.id] = (e.text ? e.text + '\n\n' : '') + aiErr(e); }
   ai.end(); const box = $('#askq'); if(box) box.value = '';
+}
+
+/* =========================================================
+   Quiz, Erklär-Modus (Feynman) und Probeklausur
+   ========================================================= */
+const ITEM_IC = {note:'📝', cards:'🗂️', quiz:'🧩', exam:'⏱️'};
+const shuffle = a => { a = [...a]; for(let k = a.length-1; k > 0; k--){ const j = Math.floor(Math.random()*(k+1)); [a[k], a[j]] = [a[j], a[k]]; } return a; };
+const arrS = a => (Array.isArray(a) ? a : []).map(x => String(x ?? '').trim()).filter(Boolean);
+const wcount = t => (t.trim().match(/\S+/g) || []).length;
+function itemText(i){
+  if(i.type === 'note') return i.content;
+  if(i.type === 'cards') return i.cards.map(c => c.q + ' ' + c.a).join(' ');
+  if(i.type === 'quiz') return i.questions.map(q => (q.q || q.text || '') + ' ' + (q.options || []).join(' ')).join(' ');
+  if(i.type === 'exam') return (i.material || '') + ' ' + i.tasks.map(t => t.text).join(' ');
+  return '';
+}
+function itemSub(i){
+  if(i.type === 'cards') return `${filled(i).length} Karteikarten`;
+  if(i.type === 'quiz'){ const best = Math.max(-1, ...(i.results || []).map(r => r.pct)); return `Quiz · ${i.questions.length} Fragen${best >= 0 ? ` · bestes Ergebnis ${best} %` : ''}`; }
+  if(i.type === 'exam'){ const g = i.status === 'graded' && i.grading ? ` · ${i.grading.np} Notenpunkte` : i.status === 'running' ? ' · läuft gerade' : i.status === 'submitted' ? ' · abgegeben' : ''; return `Probeklausur · ${i.durationMin} Min${g}`; }
+  return 'Lernzettel';
+}
+
+/* ---------- Grundlage auswählen: Lernzettel und lesbare Dateien eines Fachs ---------- */
+function sourcePicker(s, isPre){
+  const groups = s.folders.map(f => {
+    const rows = [
+      ...f.items.filter(i => i.type === 'note' && i.content.trim()).map(i => ({id:i.id, label:'📝 ' + i.title})),
+      ...f.files.filter(x => x.text).map(x => ({id:x.id, label:(FILE_IC[x.kind] || '📄') + ' ' + x.name}))
+    ];
+    if(!rows.length) return '';
+    return `<div style="font-size:12px;color:var(--muted);margin-top:4px">📁 ${esc(f.name)}</div>` +
+      rows.map(r => `<label><input type="checkbox" name="src_${r.id}" ${isPre(r.id, f) ? 'checked' : ''}> ${esc(r.label)}</label>`).join('');
+  }).join('');
+  return groups ? `<label>Grundlage (Lernzettel und Dateien mit Text)</label><div class="chk">${groups}</div>` : '';
+}
+function chosenSource(s, r){
+  const parts = [];
+  s.folders.forEach(f => {
+    f.items.forEach(i => { if(i.type === 'note' && r['src_' + i.id]) parts.push(`=== Lernzettel: ${i.title} ===\n${i.content}`); });
+    f.files.forEach(x => { if(x.text && r['src_' + x.id]) parts.push(`=== Datei: ${x.name} ===\n${x.text}`); });
+  });
+  let t = parts.join('\n\n');
+  if(t.length > MAX_TEXT){ t = t.slice(0, MAX_TEXT) + '\n[… Rest gekürzt]'; toast('Sehr viel Material – es wird nur der Anfang verwendet. Wähle weniger aus.', 6000); }
+  return t;
+}
+function targetFolder(s){
+  let f = getF(s, route.f);
+  if(!f){
+    f = s.folders.find(x => x.name === 'Quiz & Probeklausuren');
+    if(!f){ f = {id:uid(), name:'Quiz & Probeklausuren', items:[], files:[]}; s.folders.push(f); }
+  }
+  return f;
+}
+
+/* =========================================================
+   🧩 Quiz
+   ========================================================= */
+const QTYPES = {mc:'Multiple Choice', gap:'Lückentext', tf:'Wahr/Falsch'};
+function quizPrompt({s, material, n, types, lvl}){
+  return `${subjectContext(s)}
+
+Erstelle ein Quiz mit genau ${n} Fragen aus meinem Material unten.
+Fragetypen: ${types.map(t => QTYPES[t]).join(', ')} – gemischt und ungefähr gleich verteilt.
+Niveau: ${lvl === 'abi' ? 'Abitur-Niveau: auch Zusammenhänge, Ursachen/Folgen und Anwendung abfragen, nicht nur Fakten' : 'Grundlagen: zentrale Begriffe, Fakten und Definitionen'}.
+
+Regeln:
+- Nur Inhalte, die im Material stehen. Nichts erfinden.
+- Multiple Choice ("mc"): genau 4 Antwortmöglichkeiten, genau eine richtig. Falsche Antworten plausibel (typische Verwechslungen), nicht absurd. Keine "Alle genannten"-Optionen.
+- Wahr/Falsch ("tf"): eine Aussage. Etwa die Hälfte falsch; falsche Aussagen nur in einem wichtigen Detail verändert.
+- Lückentext ("gap"): ein bis zwei Sätze mit 1–3 Lücken. Jede Lücke steht als [[Lösung]] im Text. Andere richtige Schreibweisen mit | trennen, z. B. [[1923|Jahr 1923]]. Lücken nur für eindeutige Schlüsselbegriffe, Namen oder Zahlen.
+- Zu jeder Frage eine kurze Erklärung (1–2 Sätze), warum die Lösung stimmt.
+- Keine Frage doppelt.
+${langRule(s)}
+
+Antworte nur mit JSON:
+{"questions":[
+ {"type":"mc","q":"Frage","options":["…","…","…","…"],"correct":0,"explain":"…"},
+ {"type":"tf","q":"Aussage","correct":true,"explain":"…"},
+ {"type":"gap","text":"Satz mit [[Lösung]].","explain":"…"}
+]}
+
+MATERIAL:
+"""
+${material}
+"""`;
+}
+function cleanQuiz(arr, allowed){
+  const out = [];
+  for(const q of Array.isArray(arr) ? arr : []){
+    if(!q || !allowed.includes(q.type)) continue;
+    const explain = String(q.explain ?? '').trim();
+    if(q.type === 'mc'){
+      const opts = arrS(q.options), c = Number(q.correct);
+      if(!q.q || opts.length < 2 || !(c >= 0 && c < opts.length)) continue;
+      const right = opts[c], sh = shuffle(opts);
+      out.push({type:'mc', q:String(q.q), options:sh, correct:sh.indexOf(right), explain});
+    } else if(q.type === 'tf'){
+      if(!q.q) continue;
+      out.push({type:'tf', q:String(q.q), correct: q.correct === true || /^(true|wahr|richtig)$/i.test(String(q.correct)), explain});
+    } else if(q.type === 'gap'){
+      const t = String(q.text || q.q || '');
+      if(/\[\[[^\]]+\]\]/.test(t)) out.push({type:'gap', text:t, explain});
+    }
+  }
+  return out;
+}
+async function createQuiz(noteId){
+  if(!aiReady()) return;
+  const s = getS(route.s), f = getF(s, route.f);
+  const pre = noteId ? (id => id === noteId) : f ? ((id, ff) => ff === f) : (() => true);
+  const picker = sourcePicker(s, pre);
+  if(!picker){ toast('Lege zuerst Lernzettel an – daraus entsteht das Quiz.'); return; }
+  const r = await modal('🧩 Quiz erstellen', `${picker}
+    <label>Fragetypen</label>
+    <div class="chk">
+      <label><input type="checkbox" name="t_mc" checked> Multiple Choice</label>
+      <label><input type="checkbox" name="t_gap" checked> Lückentext</label>
+      <label><input type="checkbox" name="t_tf" checked> Wahr / Falsch</label>
+    </div>
+    <div class="two">
+      <div><label for="qz-n">Anzahl Fragen</label><select name="n" id="qz-n"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
+      <div><label for="qz-l">Niveau</label><select name="lvl" id="qz-l"><option value="basis">Grundlagen</option><option value="abi" selected>Abitur-Niveau</option></select></div>
+    </div>`, 'Quiz erstellen', {wide:true});
+  if(!r) return;
+  const types = Object.keys(QTYPES).filter(k => r['t_' + k]);
+  if(!types.length){ toast('Wähle mindestens einen Fragetyp.'); return; }
+  const material = chosenSource(s, r);
+  if(!material.trim()){ toast('Wähle mindestens einen Lernzettel aus.'); return; }
+  const signal = ai.start('Die KI erstellt dein Quiz…');
+  try{
+    const data = await sample.json(quizPrompt({s, material, n:+r.n, types, lvl:r.lvl}), {signal, modelTier:'default'});
+    const qs = cleanQuiz(data?.questions ?? data, types);
+    if(!qs.length) throw {code:'invalid_json'};
+    const tf = targetFolder(s);
+    const name = noteId ? getI(f, noteId)?.title : f ? f.name : s.name;
+    const i = addItem(tf, 'quiz', `Quiz: ${name}`, {questions:qs, results:[]});
+    ai.end(); quizRun = null;
+    go({view:'item', s:s.id, f:tf.id, i:i.id}); toast(`${qs.length} Fragen erstellt ✓`);
+  } catch(e){ ai.end(); toast(aiErr(e), 6000); }
+}
+
+/* Lückentext prüfen: tolerant bei Groß/Klein, Umlauten und kleinen Tippfehlern */
+function normAns(t){
+  return String(t).toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .replace(/[^a-z0-9,]+/g,' ').replace(/(\d),(\d)/g,'$1.$2').replace(/,/g,' ').replace(/\s+/g,' ').trim();
+}
+function lev(a, b){
+  const d = Array.from({length:a.length+1}, (_, k) => [k]);
+  for(let j = 1; j <= b.length; j++) d[0][j] = j;
+  for(let k = 1; k <= a.length; k++) for(let j = 1; j <= b.length; j++)
+    d[k][j] = Math.min(d[k-1][j] + 1, d[k][j-1] + 1, d[k-1][j-1] + (a[k-1] === b[j-1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+function gapMatch(given, answer){
+  const g = normAns(given); if(!g) return false;
+  return answer.split('|').some(alt => {
+    const a = normAns(alt); if(g === a) return true;
+    if(/\d/.test(a)) return false;               // Zahlen müssen genau stimmen
+    return a.length >= 5 && lev(g, a) <= (a.length >= 10 ? 2 : 1);
+  });
+}
+const gapSplit = text => text.split(/\[\[(.+?)\]\]/);
+function quizSolution(q, html){
+  if(q.type === 'mc') return html ? esc(q.options[q.correct]) : q.options[q.correct];
+  if(q.type === 'tf') return q.correct ? 'Wahr' : 'Falsch';
+  return gapSplit(q.text).map((p, k) => k % 2 ? (html ? `<b>${esc(p.split('|')[0])}</b>` : p.split('|')[0]) : (html ? esc(p) : p)).join('');
+}
+function quizQuestionText(q){
+  if(q.type === 'gap') return gapSplit(q.text).map((p, k) => k % 2 ? '_____' : p).join('');
+  return q.type === 'tf' ? 'Wahr oder falsch? ' + q.q : q.q;
+}
+
+let quizRun = null;
+function startQuiz(i, only){ quizRun = {id:i.id, order:shuffle(only || i.questions.map((_, k) => k)), pos:0, checked:false, res:null, ok:0, wrong:[]}; }
+function viewQuiz(s, f, i){
+  const mode = route.mode || 'play';
+  return `<div class="tabs no-print">
+      <button class="${mode==='play'?'on':''}" onclick="go({...route,mode:'play'})">🎯 Quiz spielen</button>
+      <button class="${mode==='list'?'on':''}" onclick="go({...route,mode:'list'})">📋 Alle Fragen & Lösungen</button>
+    </div>${mode === 'list' ? quizList(i) : quizPlay(i)}`;
+}
+function quizList(i){
+  return `<div class="list">${i.questions.map((q, k) => `<div class="task">
+    <div class="th"><b>${k+1}.</b><span class="badge">${QTYPES[q.type]}</span></div>
+    <div>${esc(quizQuestionText(q))}</div>
+    ${q.type === 'mc' ? `<ul>${q.options.map((o, j) => `<li ${j === q.correct ? 'style="color:var(--ok);font-weight:700"' : ''}>${esc(o)}${j === q.correct ? ' ✓' : ''}</li>`).join('')}</ul>` : `<p><b>Lösung:</b> ${quizSolution(q, true)}</p>`}
+    ${q.explain ? `<p class="hint">${esc(q.explain)}</p>` : ''}
+  </div>`).join('')}</div>`;
+}
+function quizPlay(i){
+  if(!quizRun || quizRun.id !== i.id) startQuiz(i);
+  const R = quizRun, n = R.order.length;
+  const hist = (i.results || []).slice(-5).map(r => r.pct + ' %').join(' → ');
+  if(R.pos >= n){
+    const pct = Math.round(R.ok / n * 100);
+    const wrongQs = R.wrong.map(k => i.questions[k]);
+    return `<div class="qwrap"><div class="quizcard" style="text-align:center">
+      <div class="score-big ${pct >= 80 ? 'urg-lo' : pct >= 50 ? 'urg-mid' : 'urg-hi'}">${pct} %</div>
+      <p><b>${R.ok} von ${n}</b> Fragen richtig ${pct === 100 ? '🎉' : ''}</p>
+      ${hist ? `<p class="hint">Deine letzten Ergebnisse: ${hist}</p>` : ''}
+      <div class="qnav" style="justify-content:center">
+        <button class="btn primary" onclick="startQuiz(curItem());render()">🔁 Nochmal (neu gemischt)</button>
+        ${wrongQs.length ? `<button class="btn" onclick="startQuiz(curItem(), quizRun.wrong);render()">Nur die falschen wiederholen</button>
+        <button class="btn" onclick="quizWrongToCards()">🗂️ Falsche als Karteikarten</button>` : ''}
+      </div></div>
+      ${wrongQs.length ? `<h2 class="sec" style="max-width:760px;margin-inline:auto">Das solltest du dir nochmal ansehen</h2>
+      <div class="list" style="max-width:760px;margin:0 auto">${wrongQs.map(q => `<div class="task">
+        <div>${esc(quizQuestionText(q))}</div><p style="margin:.4em 0"><b>Richtig:</b> ${quizSolution(q, true)}</p>
+        ${q.explain ? `<div class="hint">${esc(q.explain)}</div>` : ''}</div>`).join('')}</div>` : ''}</div>`;
+  }
+  const k = R.order[R.pos], q = i.questions[k], res = R.res;
+  let body = '';
+  if(q.type === 'mc'){
+    body = `<div class="qq">${esc(q.q)}</div><div class="qopts">${q.options.map((o, j) => {
+      const cls = R.checked ? (j === q.correct ? 'right' : j === res.given ? 'wrong' : '') : '';
+      return `<button class="qopt ${cls}" onclick="quizAnswer(${j})" ${R.checked ? 'disabled' : ''}><b>${'ABCDEF'[j]}</b><span>${esc(o)}</span></button>`;
+    }).join('')}</div><div class="hint" style="margin-top:8px">Tasten 1–${q.options.length} wählen eine Antwort.</div>`;
+  } else if(q.type === 'tf'){
+    const cls = v => R.checked ? (v === q.correct ? 'right' : v === res.given ? 'wrong' : '') : '';
+    body = `<div class="qq">${esc(q.q)}</div><div class="tfrow">
+      <button class="qopt ${cls(true)}" onclick="quizAnswer(true)" ${R.checked ? 'disabled' : ''}><b>W</b><span>Wahr</span></button>
+      <button class="qopt ${cls(false)}" onclick="quizAnswer(false)" ${R.checked ? 'disabled' : ''}><b>F</b><span>Falsch</span></button></div>`;
+  } else {
+    let g = -1;
+    body = `<div class="gaptext">${gapSplit(q.text).map((p, idx) => {
+      if(idx % 2 === 0) return esc(p);
+      g++; const ans = p.split('|')[0], st = R.checked ? (res.gaps[g] ? 'right' : 'wrong') : '';
+      const val = R.checked ? res.given[g] : '';
+      return `<input class="gapin ${st}" data-g="${g}" value="${esc(val)}" size="${Math.max(6, ans.length + 2)}" aria-label="Lücke ${g+1}" ${R.checked ? 'readonly' : ''} autocomplete="off">${R.checked && !res.gaps[g] ? `<span class="sol">→ ${esc(ans)}</span>` : ''}`;
+    }).join('')}</div>`;
+  }
+  const fb = R.checked ? `<div class="fb ${res.ok ? 'ok' : 'no'}"><b>${res.ok ? '✓ Richtig!' : '✗ Leider falsch.'}</b> ${esc(q.explain || '')}</div>` : '';
+  const nav = R.checked ? `<button class="btn primary" id="qnext" onclick="quizNext()">${R.pos + 1 < n ? 'Weiter →' : 'Auswertung →'}</button>`
+    : q.type === 'gap' ? `<button class="btn primary" onclick="quizAnswer()">Prüfen (Enter)</button>` : '';
+  return `<div class="qwrap">
+    <div class="progress"><div style="width:${R.pos / n * 100}%"></div></div>
+    <div class="qmeta"><span>Frage ${R.pos + 1} von ${n}</span><span>✓ ${R.ok} richtig</span></div>
+    <div class="quizcard"><div class="qtype">${QTYPES[q.type]}</div>${body}${fb}<div class="qnav">${nav}</div></div></div>`;
+}
+function quizAnswer(v){
+  const i = curItem(), R = quizRun; if(!R || R.checked) return;
+  const k = R.order[R.pos], q = i.questions[k];
+  if(q.type === 'gap'){
+    const given = [...document.querySelectorAll('.gapin')].map(el => el.value);
+    if(given.every(x => !x.trim())){ toast('Füll die Lücken aus – oder tippe „?“, wenn du es nicht weißt.'); return; }
+    const answers = gapSplit(q.text).filter((_, idx) => idx % 2);
+    const gaps = answers.map((a, g) => gapMatch(given[g] || '', a));
+    R.res = {given, gaps, ok:gaps.every(Boolean)};
+  } else R.res = {given:v, ok: v === q.correct};
+  R.checked = true;
+  if(R.res.ok) R.ok++; else R.wrong.push(k);
+  render();
+}
+function quizNext(){
+  const i = curItem(), R = quizRun; if(!R?.checked) return;
+  R.pos++; R.checked = false; R.res = null;
+  if(R.pos >= R.order.length){
+    (i.results ||= []).push({at:Date.now(), pct:Math.round(R.ok / R.order.length * 100), n:R.order.length});
+    i.results = i.results.slice(-30); touched(i);
+  }
+  render();
+}
+function quizWrongToCards(){
+  const s = getS(route.s), f = getF(s, route.f), i = curItem();
+  const cards = quizRun.wrong.map(k => i.questions[k]).map(q => ({q:quizQuestionText(q), a:quizSolution(q, false) + (q.explain ? '\n\n' + q.explain : '')}));
+  const c = addItem(f, 'cards', `${i.title.replace(/^Quiz:\s*/, '')} – Wiederholen`, {cards});
+  go({view:'item', s:s.id, f:f.id, i:c.id, mode:'learn'}); toast(`${cards.length} Karteikarten angelegt ✓`);
+}
+document.addEventListener('keydown', e => {
+  if(route.view !== 'item' || !quizRun || $('.modal-bg')) return;
+  const i = curItem(); if(i?.type !== 'quiz' || (route.mode && route.mode !== 'play') || quizRun.id !== i.id) return;
+  const ae = document.activeElement;
+  if(e.key === 'Enter'){
+    if(quizRun.checked){ e.preventDefault(); quizNext(); }
+    else if(ae?.classList.contains('gapin')){ e.preventDefault(); quizAnswer(); }
+    return;
+  }
+  if(['INPUT','TEXTAREA','SELECT'].includes(ae?.tagName) || quizRun.checked) return;
+  const q = i.questions[quizRun.order[quizRun.pos]]; if(!q) return;
+  if(q.type === 'mc' && /^[1-6]$/.test(e.key) && +e.key <= q.options.length) quizAnswer(+e.key - 1);
+  if(q.type === 'tf' && /^[wf]$/i.test(e.key)) quizAnswer(e.key.toLowerCase() === 'w');
+});
+
+/* =========================================================
+   🧠 Erklär-Modus (Feynman-Methode)
+   ========================================================= */
+function noteSections(i){
+  const out = []; let cur = null;
+  i.content.split('\n').forEach(l => {
+    const m = l.match(/^##\s+(.*)/);
+    if(m){ cur = {title:m[1].replace(/[*=_`]/g, '').trim(), lines:[]}; out.push(cur); }
+    else if(cur) cur.lines.push(l);
+  });
+  return out.filter(x => x.lines.join('').trim() && !/prüfungsfragen/i.test(x.title));
+}
+function explainView(s, f, i){
+  if(!i.content.trim()) return `<div class="empty">Der Lernzettel ist noch leer. Schreib ihn zuerst – dann kannst du ihn hier in eigenen Worten erklären.</div>`;
+  const secs = noteSections(i), sel = i.explainTopic ?? '';
+  const hist = (i.explains || []).slice(-6).map(e => e.score + ' %').join(' → ');
+  return `<div class="explain">
+    <div class="intro" style="--c:var(--ai)"><b>🧠 Erklär-Modus (Feynman-Methode)</b><br>
+      Erkläre das Thema in eigenen Worten – so einfach, dass es jemand ohne Vorwissen versteht. Schau dabei <b>nicht</b> in deinen Lernzettel.
+      Die KI vergleicht deine Erklärung mit dem Lernzettel und zeigt dir, was fehlt, was falsch ist und was zu ungenau bleibt.</div>
+    <label for="ex-topic">Was erklärst du?</label>
+    <select id="ex-topic">
+      <option value="" ${sel === '' ? 'selected' : ''}>Den ganzen Lernzettel: ${esc(i.title)}</option>
+      ${secs.map((x, k) => `<option value="${k}" ${String(sel) === String(k) ? 'selected' : ''}>Abschnitt: ${esc(x.title)}</option>`).join('')}
+    </select>
+    <textarea id="exta" placeholder="Erklär los … zum Beispiel: „Stell dir vor, …“ – Ursachen, Ablauf, Folgen, warum das wichtig ist.">${esc(i.explainDraft || '')}</textarea>
+    <div class="toolrow">
+      <span class="hint grow" id="exwc"></span>
+      ${dictation ? micButton('exta') : ''}
+      <button class="btn small" onclick="clearExplain()">Neu beginnen</button>
+      <button class="btn ai" onclick="checkExplain()" ${ai.busy ? 'disabled' : ''}>✨ Erklärung prüfen</button>
+    </div>
+    ${hist ? `<p class="hint">Deine bisherigen Ergebnisse: ${hist}</p>` : ''}
+    ${i.explainLast ? explainFeedback(i.explainLast) : ''}
+  </div>`;
+}
+function explainFeedback(fb){
+  const list = a => a?.length ? `<ul>${a.map(x => `<li>${inline(esc(x))}</li>`).join('')}</ul>` : '<div class="hint">–</div>';
+  return `<div class="fbhead">
+      <div class="score-big ${fb.score >= 80 ? 'urg-lo' : fb.score >= 50 ? 'urg-mid' : 'urg-hi'}">${fb.score} %</div>
+      <div><b>${esc(fb.topic)}</b> <span class="hint">· geprüft am ${fmtDate(fb.at)}</span><br>${esc(fb.summary)}</div>
+    </div>
+    <div class="fbgrid">
+      <div class="fbbox" style="--k:var(--ok)"><h4>✓ Gut erklärt</h4>${list(fb.correct)}</div>
+      <div class="fbbox" style="--k:var(--warn)"><h4>⚠ Lücken – das fehlt noch</h4>${list(fb.missing)}</div>
+      <div class="fbbox" style="--k:var(--danger)"><h4>✗ Fehler</h4>${list(fb.errors)}</div>
+      <div class="fbbox" style="--k:var(--accent)"><h4>❓ Zu ungenau oder Fachbegriff nicht erklärt</h4>${list(fb.unclear)}</div>
+    </div>
+    ${fb.questions?.length ? `<div class="fbbox" style="--k:var(--ai);margin-top:10px"><h4>🙋 Rückfragen eines Zuhörers – kannst du die beantworten?</h4>${list(fb.questions)}</div>` : ''}
+    ${fb.tip ? `<p><b>Nächster Schritt:</b> ${esc(fb.tip)}</p>` : ''}
+    <div class="toolrow"><button class="btn small" onclick="go({...route,mode:'read'})">📄 Lernzettel nochmal ansehen</button>
+      <button class="btn small" onclick="$('#exta').focus()">✏️ Erklärung verbessern und neu prüfen</button></div>`;
+}
+async function clearExplain(){
+  const i = curItem();
+  if(i.explainDraft?.trim() && !await confirmBox('Deine aktuelle Erklärung löschen und neu beginnen?', 'Neu beginnen')) return;
+  i.explainDraft = ''; i.explainLast = null; touched(i); render(); $('#exta')?.focus();
+}
+async function checkExplain(){
+  if(!aiReady()) return;
+  const s = getS(route.s), i = curItem(), text = (i.explainDraft || '').trim();
+  if(wcount(text) < 20){ toast('Erklär etwas ausführlicher – mindestens ein paar Sätze.'); return; }
+  const secs = noteSections(i), t = i.explainTopic, sec = (t !== '' && t != null) ? secs[+t] : null;
+  const topic = sec ? sec.title : i.title;
+  const ref = sec ? `## ${sec.title}\n${sec.lines.join('\n')}` : i.content;
+  const signal = ai.start('Die KI prüft deine Erklärung…', i.id);
+  try{
+    const fb = await sample.json(`${subjectContext(s)}
+
+Ich übe mit der Feynman-Methode: Ich habe das Thema "${topic}" aus dem Gedächtnis in eigenen Worten erklärt.
+Prüfe meine Erklärung anhand meines Lernzettels (Referenz) – ehrlich und genau, aber freundlich.
+
+Achte auf:
+1. Vollständigkeit: Welche wichtigen Punkte der Referenz fehlen? (Nur wirklich Wichtiges, keine Kleinigkeiten.)
+2. Richtigkeit: Was ist falsch oder verdreht? Zitiere kurz meine Formulierung und sag, was richtig ist.
+3. Verständlichkeit: Wo bleibe ich vage, nutze Fachbegriffe ohne sie zu erklären oder springe ohne Begründung? (Feynman: Würde ein Laie es verstehen?)
+4. Zusammenhänge: Erkläre ich Ursachen, Folgen und das „Warum“ – oder zähle ich nur auf?
+
+- "score" (0–100): wie vollständig und richtig ich den Kern der Referenz erklärt habe.
+- Konkrete Punkte statt allgemeiner Floskeln. Lob nur, was wirklich da ist.
+- "questions": 2–3 Rückfragen, die ein neugieriger Zuhörer an den schwächsten Stellen stellen würde.
+- Sprich mich mit "du" an. ${s.name === 'Englisch' ? 'Antworte auf Deutsch; wenn ich auf Englisch erkläre, weise auch kurz auf wichtige Sprachfehler hin.' : 'Antworte auf Deutsch.'}
+
+Antworte nur mit JSON:
+{"score":70,"summary":"1–2 Sätze Gesamteindruck","correct":["…"],"missing":["…"],"errors":["…"],"unclear":["…"],"questions":["…"],"tip":"ein konkreter nächster Schritt"}
+
+REFERENZ (mein Lernzettel):
+"""
+${ref.slice(0, MAX_TEXT)}
+"""
+
+MEINE ERKLÄRUNG:
+"""
+${text.slice(0, 30000)}
+"""`, {signal, modelTier:'default', cache:false});
+    const clean = {topic, at:Date.now(), score:Math.max(0, Math.min(100, Math.round(+fb?.score || 0))), summary:String(fb?.summary || ''),
+      correct:arrS(fb?.correct), missing:arrS(fb?.missing), errors:arrS(fb?.errors), unclear:arrS(fb?.unclear), questions:arrS(fb?.questions), tip:String(fb?.tip || '')};
+    i.explainLast = clean;
+    (i.explains ||= []).push({at:clean.at, topic, score:clean.score}); i.explains = i.explains.slice(-20);
+    touched(i); ai.end();
+    document.querySelector('.fbhead')?.scrollIntoView({behavior:'smooth', block:'start'});
+  } catch(e){ ai.end(); toast(aiErr(e), 6000); }
+}
+
+/* ---------- Sprechen statt tippen (Diktieren, nur in der Claude-Version) ---------- */
+let dictation = null, micTarget = null, micBase = '';
+const joinText = (a, b) => !a ? b.trimStart() : (/\s$/.test(a) || /^\s/.test(b)) ? a + b : a + ' ' + b;
+const micButton = id => `<button type="button" class="btn small micbtn" data-t="${id}" onclick="toggleMic('${id}')">🎙 Sprechen</button>`;
+if(inClaude) window.claude.use('dictation').then(d => {
+  if(!d) return;
+  dictation = d;
+  d.onPartial(({text}) => { const el = micTarget && document.getElementById(micTarget); if(el) el.value = joinText(micBase, text); });
+  d.onFinal(({text}) => {
+    micBase = joinText(micBase, text);
+    const el = micTarget && document.getElementById(micTarget);
+    if(el){ el.value = micBase; el.dispatchEvent(new Event('input')); }
+  });
+  d.onState(({state}) => {
+    document.querySelectorAll('.micbtn').forEach(b => {
+      const on = state !== 'idle' && b.dataset.t === micTarget;
+      b.textContent = on ? '⏹ Stopp' : '🎙 Sprechen'; b.classList.toggle('ai', on);
+    });
+  });
+  render();
+});
+function toggleMic(id){
+  if(!dictation) return;
+  if(dictation.active()){ dictation.stop().catch(() => {}); return; }
+  micTarget = id; micBase = document.getElementById(id)?.value || '';
+  dictation.start().catch(e => {
+    if(e?.code === 'not_granted'){ dictation = null; render(); toast('Mikrofon nicht erlaubt – du kannst weiter tippen.'); }
+    else if(!['stopped','dismissed'].includes(e?.code)) toast('Diktieren ist gerade nicht möglich.');
+  });
+}
+
+/* =========================================================
+   ⏱ Probeklausur
+   ========================================================= */
+const NOTE_LABEL = ['6','5-','5','5+','4-','4','4+','3-','3','3+','2-','2','2+','1-','1','1+'];
+function notenpunkte(pct){
+  const T = [[95,15],[90,14],[85,13],[80,12],[75,11],[70,10],[65,9],[60,8],[55,7],[50,6],[45,5],[40,4],[33,3],[27,2],[20,1]];
+  for(const [g, n] of T) if(pct >= g) return n;
+  return 0;
+}
+function subjectStyle(s){
+  return ({
+    'Geschichte':'Aufgaben zu einem Darstellungstext oder einer Problemstellung: Inhalt wiedergeben, historisch einordnen und erläutern, ein begründetes Sach- oder Werturteil fällen.',
+    'Politik':'Aufgaben zu einem Fallbeispiel oder Problem: Positionen/Sachverhalte darstellen, politische Strukturen und Zusammenhänge erläutern oder analysieren, begründet Stellung nehmen.',
+    'Englisch':'Text-based tasks in English on a short text: comprehension (outline/summarise), analysis (analyse/examine), comment or evaluation. All tasks and material in English.',
+    'Mathe':'Rechen- und Begründungsaufgaben mit Teilaufgaben a), b), c); Angaben stehen direkt in der Aufgabe. Erwartungshorizont mit Rechenweg und Ergebnis.',
+    'Deutsch':'Textanalyse/Interpretation eines kurzen Textauszugs oder eine materialgestützte Erörterung.',
+    'Biologie':'Materialgestützte Aufgaben (Versuchsbeschreibung, Daten oder Fallbeispiel als Text): beschreiben, erklären, Hypothesen ableiten, bewerten.'
+  })[s.name] || 'Aufgaben im typischen Klausurstil des Fachs.';
+}
+function examPrompt({s, material, d, lvl, focus}){
+  return `${subjectContext(s)}
+
+Erstelle eine realistische Probeklausur (Bearbeitungszeit ${d} Minuten, ${lvl === 'hoch' ? 'erhöhtes Anforderungsniveau (Leistungskurs)' : 'grundlegendes Anforderungsniveau'}) ausschließlich zu den Inhalten aus meinem Material unten.
+${focus ? 'Schwerpunkt: ' + focus : ''}
+
+Aufbau wie eine echte Klausur in der Oberstufe:
+- ${d <= 45 ? '2–3' : '3–4'} Aufgaben, die aufeinander aufbauen und alle drei Anforderungsbereiche abdecken: AFB I (Reproduktion: nennen, beschreiben, zusammenfassen), AFB II (Reorganisation und Transfer: erläutern, analysieren, vergleichen, einordnen), AFB III (Reflexion und Problemlösung: beurteilen, bewerten, erörtern, Stellung nehmen). Gewichtung etwa 30 / 40 / 30 %.
+- Jede Aufgabenstellung beginnt mit dem Operator (fett), in der in Klausuren üblichen Sie-Form.
+- Fachtypisch: ${subjectStyle(s)}
+- Falls ein Material nötig ist: Erfinde KEINE echten Quellen, Zitate oder Statistiken realer Personen oder Institutionen. Verfasse stattdessen selbst einen kurzen Darstellungstext oder ein Fallbeispiel (höchstens etwa 300 Wörter) und schreibe darunter „(für diese Probeklausur verfasst)“.
+- Die Aufgaben müssen in ${d} Minuten von einer guten Schülerin bzw. einem guten Schüler gut schaffbar sein.
+- Punkte: insgesamt etwa ${Math.max(20, Math.round(d * 0.75 / 5) * 5)}, verteilt nach Aufwand.
+- Zu jeder Aufgabe ein Erwartungshorizont: 3–8 Stichpunkte, was eine sehr gute Lösung enthält, jeweils mit Punkten in Klammern.
+${langRule(s)} Das gilt für Aufgaben und Material; der Erwartungshorizont darf auf Deutsch sein.
+Formatierung in den Texten: nur **fett**, Zeilenumbrüche, "- " für Listen, Teilaufgaben als "a) ".
+
+Antworte nur mit JSON:
+{"title":"kurzer Klausurtitel","material":"Materialtext oder leerer String","tasks":[{"nr":"1","afb":"I","points":10,"text":"vollständige Aufgabenstellung","horizon":["… (3 P.)"]}]}
+
+MEIN MATERIAL:
+"""
+${material}
+"""`;
+}
+async function createExam(){
+  if(!aiReady()) return;
+  const s = getS(route.s), f = getF(s, route.f), ne = nextExamFor(s.id);
+  const picker = sourcePicker(s, f ? ((id, ff) => ff === f) : (() => true));
+  if(!picker){ toast('Lege zuerst Lernzettel an – daraus entsteht die Probeklausur.'); return; }
+  const defMin = s.kind === 'LK' ? 90 : 60;
+  const r = await modal('⏱ Probeklausur erstellen', `
+    ${ne ? `<p>Deine ${esc(ne.note || 'Prüfung')} in ${esc(s.name)} ist am ${fmtExam(ne.at)} – noch ${shortLeft(new Date(ne.at) - Date.now())}.</p>` : ''}
+    ${picker}
+    <div class="two">
+      <div><label for="pk-d">Bearbeitungszeit</label><select name="d" id="pk-d">${[30,45,60,90,135,180].map(m => `<option value="${m}" ${m === defMin ? 'selected' : ''}>${m} Minuten</option>`).join('')}</select></div>
+      <div><label for="pk-l">Niveau</label><select name="lvl" id="pk-l"><option value="norm" ${s.kind === 'LK' ? '' : 'selected'}>grundlegend</option><option value="hoch" ${s.kind === 'LK' ? 'selected' : ''}>erhöht (LK)</option></select></div>
+    </div>
+    <label for="pk-x">Schwerpunkt (optional)</label>
+    <input name="x" id="pk-x" placeholder="z. B. nur Weimarer Republik bis 1923, mit Urteilsaufgabe">`, 'Klausur erstellen', {wide:true});
+  if(!r) return;
+  const material = chosenSource(s, r);
+  if(!material.trim()){ toast('Wähle mindestens einen Lernzettel aus.'); return; }
+  const signal = ai.start('Die KI stellt deine Probeklausur zusammen…');
+  try{
+    const data = await sample.json(examPrompt({s, material, d:+r.d, lvl:r.lvl, focus:r.x.trim()}), {signal, modelTier:'default'});
+    const tasks = (Array.isArray(data?.tasks) ? data.tasks : []).map((t, k) => ({
+      nr:String(t?.nr ?? k + 1).replace(/^Aufgabe\s*/i, ''), afb:String(t?.afb || '').toUpperCase().replace(/[^I]/g, ''),
+      points:Math.max(1, Math.round(+t?.points || 10)), text:String(t?.text || '').trim(), horizon:arrS(t?.horizon)
+    })).filter(t => t.text);
+    if(!tasks.length) throw {code:'invalid_json'};
+    const tf = targetFolder(s);
+    const i = addItem(tf, 'exam', 'Probeklausur: ' + (String(data.title || '').trim() || s.name),
+      {durationMin:+r.d, material:String(data.material || '').trim(), tasks, answers:{}, answerImgs:{}, status:'ready', attempts:[]});
+    ai.end(); go({view:'item', s:s.id, f:tf.id, i:i.id}); toast('Probeklausur erstellt ✓');
+  } catch(e){ ai.end(); toast(aiErr(e), 6000); }
+}
+const examEnd = i => i.startedAt + i.durationMin * 60000;
+function examCheckTimeout(i){
+  if(i.status === 'running' && Date.now() >= examEnd(i)){ i.status = 'submitted'; i.submittedAt = examEnd(i); save(); }
+}
+function examTask(t, body){
+  return `<div class="task"><div class="th"><b>Aufgabe ${esc(t.nr)}</b>${t.afb ? `<span class="badge">AFB ${t.afb}</span>` : ''}<span class="badge">${t.points} P.</span>${body.badge || ''}</div>
+    <div class="md">${md(t.text)}</div>${body.html}</div>`;
+}
+function viewExam(s, f, i){
+  const total = i.tasks.reduce((a, t) => a + t.points, 0);
+  const material = i.material ? `<div class="task"><div class="th"><b>Material</b></div><div class="md">${md(i.material)}</div></div>` : '';
+  const attempts = (i.attempts || []).map(a => `${a.np} NP`).join(' → ');
+  if(i.status === 'ready') return `<div class="intro">
+      <h3 style="margin-top:0">⏱ ${esc(i.title)}</h3>
+      <ul>
+        <li><b>Bearbeitungszeit:</b> ${i.durationMin} Minuten</li>
+        <li><b>Aufgaben:</b> ${i.tasks.length} · insgesamt ${total} Punkte ${i.tasks.map(t => t.afb ? `<span class="badge">${t.nr}: AFB ${t.afb}</span>` : '').join(' ')}</li>
+        <li>Die Zeit läuft ab dem Start – auch wenn du die Seite verlässt. Wenn sie abgelaufen ist, wird automatisch abgegeben.</li>
+        <li>Schreib wie in der echten Klausur: ganze Sätze, Fachbegriffe, klare Gliederung. ${s.name === 'Mathe' ? 'Rechenwege angeben.' : ''}</li>
+        <li>Lieber mit der Hand schreiben? Du kannst pro Aufgabe <b>Fotos deiner Lösung</b> hinzufügen – die KI liest sie mit.</li>
+        <li>Danach bewertet die KI deine Lösungen nach einem Erwartungshorizont mit Punkten und Notenpunkten.</li>
+      </ul>
+      ${attempts ? `<p class="hint">Frühere Versuche: ${attempts}</p>` : ''}
+      <button class="btn primary" onclick="startExam()">▶ Klausur starten</button>
+    </div>`;
+  if(i.status === 'running'){
+    return `<div class="examtimer"><span>⏱</span><b data-exam-end="${examEnd(i)}">--:--</b><span class="hint">verbleibend · ${i.durationMin} Min insgesamt</span>
+        <button class="btn primary" style="margin-left:auto" onclick="submitExam()">Abgeben</button></div>
+      ${material}
+      ${i.tasks.map(t => examTask(t, {html:`
+        <textarea class="ans" data-nr="${esc(t.nr)}" id="ans_${esc(t.nr)}" placeholder="Deine Lösung zu Aufgabe ${esc(t.nr)} …">${esc(i.answers[t.nr] || '')}</textarea>
+        <div class="toolrow"><span class="hint grow" id="wc_${esc(t.nr)}"></span>
+          ${dictation ? micButton('ans_' + t.nr) : ''}
+          <label class="btn small">📷 Foto der Lösung<input type="file" accept="image/*" multiple hidden onchange="addAnswerImg('${esc(t.nr)}', this)"></label></div>
+        ${answerThumbs(i, t.nr, true)}`})).join('')}
+      <div class="toolrow"><span class="grow"></span><button class="btn primary" onclick="submitExam()">Klausur abgeben</button></div>`;
+  }
+  const answersOf = t => `<details><summary>Deine Lösung ansehen</summary>
+      ${i.answers[t.nr]?.trim() ? `<div class="filetext" style="margin-top:8px">${esc(i.answers[t.nr])}</div>` : '<p class="hint">Kein getippter Text.</p>'}
+      ${answerThumbs(i, t.nr, false)}</details>`;
+  const used = i.submittedAt && i.startedAt ? Math.max(1, Math.round((i.submittedAt - i.startedAt) / 60000)) : null;
+  if(i.status === 'submitted') return `<div class="intro">
+      <b>✅ Abgegeben${used ? ` nach ${used} von ${i.durationMin} Minuten` : ''}.</b>
+      <p>Jetzt bewertet die KI deine Lösungen nach dem Erwartungshorizont.</p>
+      ${ai.busy ? '' : `<button class="btn ai" onclick="gradeExam()">✨ Jetzt bewerten lassen</button>`}
+    </div>${material}${i.tasks.map(t => examTask(t, {html:answersOf(t)})).join('')}`;
+  const g = i.grading;
+  return `<div class="fbhead">
+      <div class="score-big ${g.np >= 10 ? 'urg-lo' : g.np >= 5 ? 'urg-mid' : 'urg-hi'}">${g.np} NP</div>
+      <div><b>Note ${NOTE_LABEL[g.np]}</b> · ${String(g.sum).replace('.', ',')} von ${g.max} Punkten (${String(g.pct).replace('.', ',')} %)${used ? ` · Bearbeitungszeit ${used} von ${i.durationMin} Min` : ''}
+        <br>${esc(g.overall)}</div>
+    </div>
+    ${g.next.length ? `<div class="fbbox" style="--k:var(--ai);margin-bottom:14px"><h4>📌 Das solltest du bis zur Klausur üben</h4><ul>${g.next.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+    ${material}
+    ${i.tasks.map(t => { const r = g.tasks.find(x => x.nr === t.nr) || {points:0, feedback:'', good:[], missing:[]}; return examTask(t, {
+      badge:`<span class="badge" style="margin-left:auto;font-size:13px;font-weight:700">${String(r.points).replace('.', ',')} / ${t.points} P.</span>`,
+      html:`<p>${esc(r.feedback)}</p>
+        <div class="fbgrid">
+          <div class="fbbox" style="--k:var(--ok)"><h4>✓ Gelungen</h4>${r.good.length ? `<ul>${r.good.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<div class="hint">–</div>'}</div>
+          <div class="fbbox" style="--k:var(--warn)"><h4>⚠ Fehlt oder falsch</h4>${r.missing.length ? `<ul>${r.missing.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<div class="hint">–</div>'}</div>
+        </div>
+        ${answersOf(t)}
+        <details><summary>Erwartungshorizont</summary><ul>${t.horizon.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>`}); }).join('')}
+    <p class="hint">Die Bewertung durch die KI ist eine Orientierung für dein Lernen, keine offizielle Note. ${attempts ? 'Deine Versuche: ' + attempts : ''}</p>
+    <div class="toolrow"><button class="btn" onclick="resetExam()">🔁 Nochmal schreiben</button><button class="btn" onclick="createExam()">⏱ Neue Probeklausur</button></div>`;
+}
+function answerThumbs(i, nr, editable){
+  const imgs = i.answerImgs?.[nr] || [];
+  return imgs.length ? `<div class="thumbs" style="margin-top:8px">${imgs.map((d, k) => `<span><img src="${d}" alt="Foto ${k+1} zu Aufgabe ${esc(nr)}">${editable ? `<button aria-label="Foto entfernen" onclick="removeAnswerImg('${esc(nr)}', ${k})">✕</button>` : ''}</span>`).join('')}</div>` : '';
+}
+async function addAnswerImg(nr, input){
+  const i = curItem(), files = [...input.files]; input.value = '';
+  for(const file of files){
+    try{ const d = await toDataURL(await downscale(file, 1600, .8)); ((i.answerImgs ||= {})[nr] ||= []).push(d); }
+    catch(e){ toast(`„${file.name}“ konnte nicht gelesen werden.`); }
+  }
+  touched(i); render();
+}
+function removeAnswerImg(nr, k){ const i = curItem(); i.answerImgs[nr].splice(k, 1); touched(i); render(); }
+function startExam(){ const i = curItem(); i.status = 'running'; i.startedAt = Date.now(); i.submittedAt = null; touched(i); render(); }
+let submitting = false;
+async function submitExam(auto){
+  const i = curItem(); if(i?.type !== 'exam' || i.status !== 'running' || submitting) return;
+  submitting = true;
+  try{
+    if(!auto){
+      const left = examEnd(i) - Date.now();
+      if(left > 60000 && !await confirmBox(`Du hast noch ${Math.round(left / 60000)} Minuten Zeit. Jetzt abgeben?`, 'Abgeben')) return;
+      if(i.status !== 'running') return;
+    } else closeModal();
+    if(dictation?.active()) dictation.stop().catch(() => {});
+    i.status = 'submitted'; i.submittedAt = Math.min(Date.now(), examEnd(i)); touched(i); save();
+    if(auto) toast('⏰ Die Zeit ist um – deine Klausur wurde abgegeben.', 6000);
+    render();
+    if(sample) gradeExam();
+  } finally { submitting = false; }
+}
+async function gradeExam(){
+  if(!aiReady()) return;
+  const s = getS(route.s), i = curItem();
+  const images = [], imgNote = [];
+  const allImgs = i.tasks.flatMap(t => (i.answerImgs?.[t.nr] || []).map(d => [t.nr, d]));
+  if(allImgs.length){
+    if(!imgLimits) toast('Fotos können hier nicht mitbewertet werden – nur der getippte Text.', 6000);
+    else {
+      for(const [nr, d] of allImgs){
+        if(images.length >= imgLimits.maxCount){ toast(`Es können nur ${imgLimits.maxCount} Fotos mitbewertet werden.`, 6000); break; }
+        images.push(await (await fetch(d)).blob()); imgNote.push(`Bild ${images.length} = Lösung zu Aufgabe ${nr}`);
+      }
+    }
+  }
+  const tasksTxt = i.tasks.map(t => `Aufgabe ${t.nr} (AFB ${t.afb || '?'}, max. ${t.points} Punkte):\n${t.text}\nErwartungshorizont:\n${t.horizon.map(h => '- ' + h).join('\n')}`).join('\n\n');
+  const answersTxt = i.tasks.map(t => `Aufgabe ${t.nr}:\n"""\n${(i.answers[t.nr] || '').trim() || '(kein getippter Text' + ((i.answerImgs?.[t.nr] || []).length ? ' – siehe Foto' : '') + ')'}\n"""`).join('\n\n');
+  const signal = ai.start('Die KI korrigiert deine Klausur…', i.id);
+  try{
+    const g = await sample.json(`${subjectContext(s)}
+
+Du bist eine faire, erfahrene Lehrkraft und korrigierst meine Probeklausur so, wie eine Klausur in der Oberstufe korrigiert wird.
+Regeln:
+- Bewerte jede Aufgabe anhand des Erwartungshorizonts und der Maximalpunkte. Vergib ganze oder halbe Punkte.
+- Prüfe, ob der Operator erfüllt ist (z. B. verlangt „beurteilen“ ein begründetes eigenes Urteil, „nennen“ nur eine knappe Aufzählung, „erläutern“ Beispiele und Begründungen).
+- Gleichwertige richtige Lösungen, die nicht im Erwartungshorizont stehen, zählen auch.
+- Leere oder fehlende Antwort = 0 Punkte. Sei ehrlich und genau, nicht zu großzügig.
+- Feedback auf Deutsch, duze mich.${s.name === 'Englisch' ? ' Bewerte bei Englisch auch Sprache (Ausdruck, Grammatik) und nenne typische Fehler.' : ''}
+${imgNote.length ? 'Angehängt sind Fotos meiner handschriftlichen Lösungen: ' + imgNote.join('; ') + '. Lies sie genau und werte sie wie getippten Text.' : ''}
+
+Antworte nur mit JSON:
+{"tasks":[{"nr":"1","points":7.5,"feedback":"2–4 Sätze","good":["was gelungen ist"],"missing":["was fehlt oder falsch ist"]}],"overall":"Gesamteindruck in 2–3 Sätzen","next":["konkreter Tipp, was ich bis zur Klausur üben sollte"]}
+
+KLAUSUR:
+${i.material ? 'Material:\n"""\n' + i.material + '\n"""\n\n' : ''}${tasksTxt}
+
+MEINE LÖSUNGEN:
+${answersTxt}`, {signal, modelTier:'default', cache:false, ...(images.length ? {images} : {})});
+    const tasks = i.tasks.map(t => {
+      const r = (g?.tasks || []).find(x => String(x?.nr).replace(/^Aufgabe\s*/i, '') === t.nr) || {};
+      return {nr:t.nr, points:Math.max(0, Math.min(t.points, Math.round((+r.points || 0) * 2) / 2)), max:t.points,
+        feedback:String(r.feedback || ''), good:arrS(r.good), missing:arrS(r.missing)};
+    });
+    const sum = tasks.reduce((a, t) => a + t.points, 0), max = tasks.reduce((a, t) => a + t.max, 0);
+    const pct = Math.round(sum / max * 1000) / 10, np = notenpunkte(pct);
+    i.grading = {tasks, sum, max, pct, np, overall:String(g?.overall || ''), next:arrS(g?.next), at:Date.now()};
+    i.status = 'graded'; (i.attempts ||= []).push({at:Date.now(), np, pct});
+    touched(i); ai.end(); toast(`Bewertet: ${np} Notenpunkte`);
+  } catch(e){ ai.end(); toast(aiErr(e), 6000); }
+}
+async function resetExam(){
+  const i = curItem();
+  if(!await confirmBox('Klausur nochmal schreiben? Deine Antworten und die Bewertung werden geleert (das Ergebnis bleibt in der Versuchsliste).', 'Nochmal schreiben')) return;
+  Object.assign(i, {answers:{}, answerImgs:{}, grading:null, status:'ready', startedAt:null, submittedAt:null});
+  touched(i); render();
+}
+
+/* Eingaben im Erklär-Modus und in der Probeklausur speichern */
+function bindExtra(i){
+  const ex = $('#exta');
+  if(ex){ const wc = () => { $('#exwc').textContent = wcount(ex.value) + ' Wörter'; }; wc(); ex.oninput = () => { i.explainDraft = ex.value; wc(); touched(i); }; }
+  const sel = $('#ex-topic'); if(sel) sel.onchange = () => { i.explainTopic = sel.value; touched(i); };
+  document.querySelectorAll('textarea.ans').forEach(el => {
+    const nr = el.dataset.nr, w = document.getElementById('wc_' + nr);
+    const upd = () => { if(w) w.textContent = wcount(el.value) + ' Wörter'; };
+    upd(); el.oninput = () => { i.answers[nr] = el.value; upd(); touched(i); };
+  });
+  if(i.type === 'quiz' && quizRun?.id === i.id && (!route.mode || route.mode === 'play')){
+    if(quizRun.checked) $('#qnext')?.focus(); else document.querySelector('.gapin')?.focus();
+  }
 }
 
 /* =========================================================

@@ -18,6 +18,9 @@ Fächer: LK Geschichte, LK Politik, LK Englisch, P4 Mathe, P5 Deutsch, Biologie,
   - im Lernzettel: überarbeiten, aufs Wichtigste kürzen (mit Rückgängig), Karteikarten daraus erstellen, Fragen stellen
   - im Kartensatz: weitere Karten vorschlagen
 - **📎 Dateien in Mappen:** PDF, Word (.docx), Fotos (JPG/PNG) und Textdateien hochladen – per Klick oder Drag & Drop. Text wird automatisch ausgelesen (durchsuchbar). Daraus mit ✨ einen Lernzettel **zusammenfassen** oder den Inhalt vollständig **übernehmen** lassen; Fotos und eingescannte PDFs liest die KI direkt („Text erkennen“ schreibt sie ab). Textdateien gehen auch ohne KI als Lernzettel.
+- **🧩 Quiz-Generator:** aus Lernzetteln (und Dateien) automatisch Multiple-Choice-, Lückentext- und Wahr/Falsch-Fragen erzeugen. Sofortiges Feedback mit Erklärung, Lückentext tolerant bei Tippfehlern, Ergebnisverlauf, falsche Fragen wiederholen oder als Karteikarten speichern. Tasten: 1–4, W/F, Enter.
+- **🧠 Erklär-Modus (Feynman-Methode):** Reiter „Erklären“ im Lernzettel. Thema (ganzer Zettel oder ein Abschnitt) in eigenen Worten erklären – tippen oder sprechen – und die KI zeigt: gut erklärt, Lücken, Fehler, zu ungenau, Rückfragen und einen Prozentwert.
+- **⏱ Probeklausur:** KI erstellt eine Klausur im Stil echter Oberstufenklausuren (Operatoren, AFB I–III, Punkte, ggf. Material) mit Zeitlimit. Abgabe automatisch bei Zeitablauf, handschriftliche Lösungen per Foto möglich. Danach Bewertung nach Erwartungshorizont mit Punkten pro Aufgabe, Notenpunkten und Lerntipps.
 - **Mappen** pro Fach anlegen, umbenennen, löschen (z. B. „Q1 – Weimarer Republik“)
 - **📄 Ansicht** jedes Lernzettels als ganze Seite wie ein PDF (weißes A4-Blatt) und **⬇ Als PDF speichern** (echte A4-PDF-Datei)
 - **Lernzettel** bearbeiten mit Live-Vorschau und einfacher Formatierung:
